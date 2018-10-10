@@ -1,0 +1,17 @@
+# Config file for automatic testing at travis-ci.org
+sudo: false  # http://docs.travis-ci.com/user/migrating-from-legacy/
+language: python
+python:
+  - "3.6"
+install: pip install -r requirements.txt
+before_script:
+  - export DEBUG=1
+  - export APP_SETTINGS_DATASYNC=test
+
+script: nosetests -v
+
+deploy:
+      provider: pypi
+      user: team
+      password: team
+      server: https://teampypi.herokuapp.com/
