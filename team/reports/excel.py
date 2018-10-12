@@ -36,15 +36,21 @@ class ExcelFile:
             self.sheet[self.column_names_dict[item] + _current_product_code] \
              = product[item] if item in product else self.NOT_FOUND_ITEM
 
+
+    def update_file(self, product_list):
+        for product in product_list:
+            self.update_line(product)
+
+
     def save_file(self):
         self.wb.save(self.target_filename)
             
 
 
 
-def update_file(sheet, product_list):
-    for product in product_list:
-        sheet.update_line(product)
+# def update_file(sheet, product_list):
+#     for product in product_list:
+#         sheet.update_line(product)
 
 
 
@@ -67,7 +73,8 @@ with open('products.json') as f:
 
 a = ExcelFile('test.xlsx', 'test', 'final.xlsx')
 
-update_file(a, all_products)
+a.update_file(all_products)
+# update_file(a, all_products)
 
 # a.update_line(odp)
 
