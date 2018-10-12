@@ -42,6 +42,10 @@ class ExcelFile:
             self.update_line(product)
 
 
+    def list_all_products(self):
+        return [product_code for product_code in self.product_codes_dict
+                if product_code != self.PRODUCT_CODE]
+
     def save_file(self):
         self.wb.save(self.target_filename)
             
