@@ -6,7 +6,7 @@ python:
 install: pip install -r requirements.txt
 before_script:
   - export DEBUG=1
-  - export APP_SETTINGS_DATASYNC=test
+  - export APP_SETTINGS_REPORTS=test
 
 script: nosetests -v
 
