@@ -52,34 +52,14 @@ class ExcelFile:
 
 
 
-# def update_file(sheet, product_list):
-#     for product in product_list:
-#         sheet.update_line(product)
+if __name__ == '__main__':
 
 
+    with open('products.json') as f:
+        all_products = json.load(f)
 
 
-with open('products.json') as f:
-    all_products = json.load(f)
+    a = ExcelFile('test.xlsx', 'test', 'final.xlsx')
 
-
-
-
-# odp = {
-#     'product_code':'prod2',
-#     'colour':'red',
-#     'feature':'nice',
-#     'price':10,
-#     'nowy':0
-# }
-
-
-
-a = ExcelFile('test.xlsx', 'test', 'final.xlsx')
-
-a.update_file(all_products)
-# update_file(a, all_products)
-
-# a.update_line(odp)
-
-a.save_file()
+    a.update_file(all_products)
+    a.save_file()

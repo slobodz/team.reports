@@ -16,7 +16,7 @@ elif app_settings == 'prod':
 else:
     raise ValueError('Invalid environment name')
 
-#logging
-LOG_LOCATION = app_config.LOG_LOCATION
-logging.basicConfig(filename=os.path.join(LOG_LOCATION,'fullrefresh' + datetime.datetime.today().strftime('%Y%m%d%H%M%S') + '.log'), format='%(asctime)s %(message)s', level=logging.DEBUG)
+# #logging
+# LOG_LOCATION = app_config.LOG_LOCATION
+# logging.basicConfig(filename=os.path.join(LOG_LOCATION,'fullrefresh' + datetime.datetime.today().strftime('%Y%m%d%H%M%S') + '.log'), format='%(asctime)s %(message)s', level=logging.DEBUG)
     
