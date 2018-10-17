@@ -1,4 +1,6 @@
 from tkinter import *
+import tkinter as tk
+
 
 root = Tk()
 root.title('Team Reports')
@@ -40,4 +42,38 @@ login_button.pack(anchor=CENTER)
 
 
 
-root.mainloop()
+# root.mainloop()
+
+
+
+class LoginForm(tk.Tk):
+    def __init__(self):
+        super().__init__()
+
+        self.title("Team Reports")
+        self.geometry("300x150")
+        self.frame()
+
+        self.name_label = tk.Label(self, text="Email")
+        self.name_entry = tk.Entry(self, bg="white", fg="black", state='disabled')
+        self.code_label = tk.Label(self, text="Password")
+        self.code_entry = tk.Entry(self, bg="white", fg="black")
+        self.empty_label = tk.Label(self, text)
+        self.submit_button = tk.Button(self, text="Log In", command=print("hello"))
+
+
+        self.name_label.pack(fill=tk.BOTH, expand=1)
+        self.name_entry.pack(fill=tk.BOTH, expand=1)
+        self.code_label.pack(fill=tk.BOTH, expand=1)
+        self.code_entry.pack(fill=tk.BOTH, expand=1)
+        self.empty_label.pack(fill=tk.BOTH, expand=1)
+        self.submit_button.pack(fill=tk.X)
+
+
+    def submit(self):
+        pass
+
+
+
+a = LoginForm()
+a.mainloop()
