@@ -10,8 +10,5 @@
     "python.unitTest.pyTestEnabled": false,
     "python.unitTest.nosetestsEnabled": false,
     "python.unitTest.unittestEnabled": true,
-    //"python.unitTest.cwd": "C:\\WORK\\team\\team.reports\\tests",
-    //"python.unitTest.unittestEnabled": true,
-    //"python.unitTest.pyTestEnabled": false,
-    //"python.unitTest.nosetestsEnabled": false
+    "python.linting.pylintArgs": ["--errors-only"]
 }

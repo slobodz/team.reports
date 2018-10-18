@@ -2,72 +2,56 @@ from tkinter import *
 import tkinter as tk
 
 
-# root = Tk()
-# root.title('Team Reports')
-# root.resizable(False, False)
-
-
-# top_frame = Frame(root, height=35)
-# top_frame.pack(anchor=N)
-
-# login_output = Label(top_frame, text="Wrong credentials", fg='red')
-# # login_output.pack(fill=BOTH)
-
-# def pack_login_output(Label):
-#     Label.pack(anchor=W)
-
-
-
-# frame = Frame(root)
-# frame.pack(anchor=NW, pady=0, padx=10)
-
-# email_label = Label(frame, text='Email')
-# email_label.grid(row=0, column=0, pady=10, padx=5, sticky=E)
-
-# password_label = Label(frame, text='Password')
-# password_label.grid(row=1, column=0, pady=10, padx=5, sticky=E)
-
-# email_input = Entry(frame, width=30)
-# email_input.grid(row=0, column=1)
-
-# password_input = Entry(frame, width=30, show='*')
-# password_input.grid(row=1, column=1)
-
-
-# login_frame = Frame(root)
-# login_frame.pack(anchor=S, pady=10)
-# login_button = Button(login_frame, text='Log In', width=10, command=lambda: login_output.pack(fill=BOTH))
-# login_button.pack(anchor=CENTER)
-
-
-
-
-# root.mainloop()
-
-
-
 class LoginForm(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.title("Team Reports")
-        self.geometry("300x150")
-        self.frame()
+        #self.geometry("300x150")
 
-        self.email_label = tk.Label(self, text="Email")
-        self.email_entry = tk.Entry(self, bg="white", fg="black")
-        self.password_label = tk.Label(self, text="Password")
-        self.password_entry = tk.Entry(self, bg="white", fg="black", show='*')
-        self.empty_label = tk.Label(self, text="")
-        self.submit_button = tk.Button(self, text="Log In", command=self.submit)
+        self.login_frame = tk.Frame(self, bd=5)
+        self.main_frame = tk.Frame(self, bd=5)
+        self.empty_frame = tk.Frame(self, width=200, bd=5)
 
 
-        self.email_label.pack(fill=tk.BOTH, expand=1)
-        self.email_entry.pack(fill=tk.BOTH, expand=1)
-        self.password_label.pack(fill=tk.BOTH, expand=1)
-        self.password_entry.pack(fill=tk.BOTH, expand=1)
-        self.empty_label.pack(fill=tk.BOTH, expand=1)
-        self.submit_button.pack(fill=tk.X)
+        self.email_label = tk.Label(self.login_frame, text="Email")
+        self.email_entry = tk.Entry(self.login_frame, bg="white", fg="black")
+        self.password_label = tk.Label(self.login_frame, text="Password")
+        self.password_entry = tk.Entry(self.login_frame, bg="white", fg="black", show='*')
+        self.empty_label = tk.Label(self.login_frame, text="")
+        self.submit_button = tk.Button(self.login_frame, text="Log In", command=self.submit)
+        self.test_label = tk.Label(self.empty_frame, text="test")
+
+        self.product_label = tk.Label(self.main_frame, text="")
+        self.product_button = tk.Button(self.main_frame, text="Generate report for\nselected products")
+        self.full_refresh_label = tk.Label(self.main_frame, text="")
+        self.full_refresh_button = tk.Button(self.main_frame, text="Generate report for\nall products")
+
+
+
+        self.login_frame.pack(side=LEFT, fill=BOTH, expand=False)
+        self.empty_frame.pack(side=LEFT, fill=BOTH, expand=False)        
+        self.main_frame.pack(side=RIGHT, fill=BOTH, expand=1)
+
+        self.email_label.pack(fill=tk.BOTH, expand=False)
+        self.email_entry.pack(fill=tk.BOTH, expand=False)
+        self.password_label.pack(fill=tk.BOTH, expand=False)
+        self.password_entry.pack(fill=tk.BOTH, expand=False)
+        self.empty_label.pack(fill=tk.BOTH, expand=False)
+        self.submit_button.pack(fill=tk.BOTH, expand=False)
+        self.test_label.pack(fill=tk.BOTH, expand=False)
+
+
+        self.product_label.pack(fill=BOTH, expand=1)
+        self.product_button.pack(fill=BOTH, expand=1)
+        self.full_refresh_label.pack(fill=BOTH, expand=1)
+        self.full_refresh_button.pack(fill=BOTH, expand=1)
+
+
+
+
+
+
 
 
     def submit(self):
@@ -83,7 +67,7 @@ class LoginForm(tk.Tk):
 
             self.destroy()
 
-            GenerateReportForm().mainloop()
+            #GenerateReportForm().mainloop()
 
 
 
@@ -96,24 +80,25 @@ class LoginForm(tk.Tk):
 
 
 
-class GenerateReportForm(tk.Tk):
-    def __init__(self):
-        super().__init__()
 
-        self.title("Team Reports")
-        self.geometry("300x150")
-        self.frame()
+# class GenerateReportForm(tk.Tk):
+#     def __init__(self):
+#         super().__init__()
 
-        self.product_label = tk.Label(self, text="")
-        self.product_button = tk.Button(self, text="Generate report for selected products")
-        self.full_refresh_label = tk.Label(self, text="")
-        self.full_refresh_button = tk.Button(self, text="Generate report for all products")
+#         self.title("Team Reports")
+#         self.geometry("300x150")
+#         self.frame()
+
+#         self.product_label = tk.Label(self, text="")
+#         self.product_button = tk.Button(self, text="Generate report for selected products")
+#         self.full_refresh_label = tk.Label(self, text="")
+#         self.full_refresh_button = tk.Button(self, text="Generate report for all products")
 
 
-        self.product_label.pack(fill=BOTH, expand=1)
-        self.product_button.pack(fill=BOTH, expand=1)
-        self.full_refresh_label.pack(fill=BOTH, expand=1)
-        self.full_refresh_button.pack(fill=BOTH, expand=1)
+#         self.product_label.pack(fill=BOTH, expand=1)
+#         self.product_button.pack(fill=BOTH, expand=1)
+#         self.full_refresh_label.pack(fill=BOTH, expand=1)
+#         self.full_refresh_button.pack(fill=BOTH, expand=1)
 
 
 a = LoginForm()
