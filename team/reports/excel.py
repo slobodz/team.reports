@@ -10,9 +10,9 @@ class ExcelFile:
     NOT_FOUND_ITEM = '<not found>'
     PRODUCT_CODE = 'product_code'
 
-    def __init__(self, filename, sheet, target_filename):
+    def __init__(self, filename, sheet, target_filename=None):
         self.filename = filename
-        self.target_filename = target_filename
+        self.target_filename = target_filename if target_filename is not None else filename
         self.wb = load_workbook(self.filename)
         self.sheet = self.wb[sheet]
         
@@ -47,6 +47,7 @@ class ExcelFile:
             if product_code != self.PRODUCT_CODE]
 
     def save_file(self):
+        self.wb.close()
         self.wb.save(self.target_filename)
             
 
