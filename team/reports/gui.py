@@ -78,6 +78,7 @@ class LoginForm(tk.Tk):
 
     def generate_selected_products(self):
         self.product_label.config(text="Loading...")
+        self.product_label.update_idletasks()
         with open('products.json') as f:
             all_products = json.load(f)
 
@@ -86,7 +87,7 @@ class LoginForm(tk.Tk):
 
         a.update_file(all_products)
         a.save_file()
-
+        #self.product_label.config(text="")
 
     def generate_all_products(self):
         pass

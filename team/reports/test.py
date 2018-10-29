@@ -1,10 +1,29 @@
-from tkinter import *
+import tkinter as tk
+import time
 
-root = Tk()
+class SampleApp(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
+        self.frame = tk.Frame(self)
+        self.frame.pack(side="top", fill = "both", expand=True)
 
-w = Frame(root, bg="red")
-w.pack(side=LEFT, fill=X, expand=1)
-z = Frame(root, bg="green")
-z.pack(side=RIGHT, fill=X, expand=1)
+        self.label = tk.Label(self, text = "Hello, world")
+        button1 = tk.Button(self, text = "Start to do something",
+                                  command = self.do_something)
+        self.label.pack(in_=self.frame)
+        button1.pack(in_=self.frame)
 
-mainloop()
+    def do_something(self):
+        self.label.config(text = "Wait till I'm done...")
+        self.label.update_idletasks()
+        time.sleep(2)
+        print ("end sleep")
+        self.label.config(text = "I'm done doing...")
+
+def main():
+    app = SampleApp()
+    app.mainloop()  
+    return 0
+
+if __name__ == '__main__':
+    main()
