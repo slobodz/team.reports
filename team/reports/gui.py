@@ -26,7 +26,7 @@ class LoginForm(tk.Tk):
         self.product_label = tk.Label(self.main_frame, text="")
         self.product_button = tk.Button(self.main_frame, text="Generate report for\nselected products", width=25, state='disabled', command=self.generate_selected_products)
         self.full_refresh_label = tk.Label(self.main_frame, text="")
-        self.full_refresh_button = tk.Button(self.main_frame, text="Generate report for\nall products", width=25, state='disabled')
+        self.full_refresh_button = tk.Button(self.main_frame, text="Generate report for\nall products", width=25, state='disabled', command=self.generate_all_products)
 
 
 
@@ -78,7 +78,11 @@ class LoginForm(tk.Tk):
 
     def generate_selected_products(self):
         self.product_label.config(text="Loading...")
+        self.product_button.config(state='disable')
+        self.full_refresh_button.config(state='disable')              
         self.product_label.update_idletasks()
+
+        # update the excel file here
         with open('products.json') as f:
             all_products = json.load(f)
 
@@ -86,11 +90,16 @@ class LoginForm(tk.Tk):
         a = ExcelFile('team_lista.xlsx', 'produkty')
 
         a.update_file(all_products)
-        a.save_file()
-        #self.product_label.config(text="")
+        
+        self.product_label.config(text=a.save_file())
+        self.product_button.config(state='normal')
+
 
     def generate_all_products(self):
-        pass
+        self.full_refresh_label.config(text="Loading...")
+        self.product_button.config(state='disable')
+        self.full_refresh_button.config(state='disable')
+        self.full_refresh_label.update_idletasks()
 
 
 

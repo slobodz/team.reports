@@ -48,8 +48,13 @@ class ExcelFile:
 
     def save_file(self):
         self.wb.close()
-        self.wb.save(self.target_filename)
-            
+        try:
+            self.wb.save(self.target_filename)
+            return("Done!")
+        except PermissionError:
+            return("Please close the file!")
+
+        
 
 
 
@@ -60,7 +65,7 @@ if __name__ == '__main__':
         all_products = json.load(f)
 
 
-    a = ExcelFile('test.xlsx', 'test', 'final.xlsx')
+    a = ExcelFile('team_lista.xlsx', 'produkty')
 
     a.update_file(all_products)
     a.save_file()
