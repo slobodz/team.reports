@@ -48,11 +48,8 @@ class ExcelFile:
 
     def save_file(self):
         self.wb.close()
-        try:
-            self.wb.save(self.target_filename)
-            return("Done!")
-        except PermissionError:
-            return("Please close the file!")
+        self.wb.save(self.target_filename)
+
 
         
 

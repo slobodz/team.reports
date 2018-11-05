@@ -9,6 +9,8 @@ class LoginForm(tk.Tk):
 
         self.title("Team Reports")
 
+        self.lbl = tk.StringVar()
+        self.lbl.set("Test")
 
         self.login_frame = tk.Frame(self, bd=5)
         self.main_frame = tk.Frame(self, bd=5)
@@ -16,9 +18,9 @@ class LoginForm(tk.Tk):
 
 
 
-        self.email_label = tk.Label(self.login_frame, text="Email", width=25)
+        self.email_label = tk.Label(self.login_frame, textvariable=self.lbl, width=25)
         self.email_entry = tk.Entry(self.login_frame, bg="white", fg="black", width=25)
-        self.password_label = tk.Label(self.login_frame, text="Password", width=25)
+        self.password_label = tk.Label(self.login_frame, textvariable=self.lbl, width=25)
         self.password_entry = tk.Entry(self.login_frame, bg="white", fg="black", show='*', width=25)
         self.empty_label = tk.Label(self.login_frame, text="", width=25)
         self.submit_button = tk.Button(self.login_frame, text="Log In", command=self.submit, width=25)
@@ -67,6 +69,7 @@ class LoginForm(tk.Tk):
             self.password_entry.config(state='normal')
             self.product_button.config(state='normal')
             self.full_refresh_button.config(state='normal')
+            self.lbl.set("")
 
             #GenerateReportForm().mainloop()
 
@@ -91,7 +94,11 @@ class LoginForm(tk.Tk):
 
         a.update_file(all_products)
         
-        self.product_label.config(text=a.save_file())
+        try:
+            a.save_file()
+            self.product_label.config(text="Done!")
+        except PermissionError:
+            self.product_label.config(text="Please close the file!")         
         self.product_button.config(state='normal')
 
 
