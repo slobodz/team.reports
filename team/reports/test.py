@@ -15,7 +15,12 @@ class SampleApp(tk.Tk):
 
 
 class Parent():
+    def test_text(self):
+        return('this is test')
+
+class Child(Parent):
     pass
+
 
 
 

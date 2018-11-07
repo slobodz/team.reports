@@ -29,8 +29,9 @@ class ExcelFile:
             }
 
 
-    def update_line(self, product):
-        _current_product_code = str(self.product_codes_dict[product[self.PRODUCT_CODE]])
+    def update_line(self, product, row=None):
+        _current_product_code = str(self.product_codes_dict[product[self.PRODUCT_CODE]]) if row is None \
+                                else row
 
         for item in self.column_names_dict:
             self.sheet[self.column_names_dict[item] + _current_product_code] \
@@ -46,9 +47,20 @@ class ExcelFile:
         return [product_code for product_code in self.product_codes_dict
             if product_code != self.PRODUCT_CODE]
 
+
     def save_file(self):
         self.wb.close()
         self.wb.save(self.target_filename)
+
+
+    def update_all_products(self, product_list):
+        _product_code_column = self.column_names_dict[self.PRODUCT_CODE]
+
+        for row, product in enumerate(product_list, 2):
+            self.sheet[_product_code_column + str(row)] = product[self.PRODUCT_CODE]
+            self.update_line(product, row=row)
+
+
 
 
         
