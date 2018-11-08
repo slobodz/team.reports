@@ -31,7 +31,7 @@ class ExcelFile:
 
     def update_line(self, product, row=None):
         _current_product_code = str(self.product_codes_dict[product[self.PRODUCT_CODE]]) if row is None \
-                                else row
+                                else str(row)
 
         for item in self.column_names_dict:
             self.sheet[self.column_names_dict[item] + _current_product_code] \

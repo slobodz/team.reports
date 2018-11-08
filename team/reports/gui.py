@@ -14,14 +14,12 @@ class LoginForm(tk.Tk):
         self.main_frame = tk.Frame(self, bd=5)
         self.empty_frame = tk.Frame(self, width=15, bd=5)
 
-        # self.logging_info_text = tk.StringVar()
-        # self.logging_info_text.set("test")
 
 
         self.logging_info_text = LabelString()
         self.product_text = LabelString()
         self.full_refresh_text = LabelString()
-        #self.logging_info_text.set("test")
+
 
         self.email_label = tk.Label(self.login_frame, text="Email", width=25)
         self.email_entry = tk.Entry(self.login_frame, bg="white", fg="black", width=25)
@@ -81,6 +79,7 @@ class LoginForm(tk.Tk):
             self.password_entry.config(state='normal')
             self.product_button.config(state='normal')
             self.full_refresh_button.config(state='normal')
+            self.empty_frame.focus()
 
 
         else:
@@ -107,7 +106,16 @@ class LoginForm(tk.Tk):
 
         a = ExcelFile('team_lista.xlsx', 'produkty')
 
-        a.update_file(all_products)
+        current_products_list = a.list_all_products()
+        #tutaj jak sie wyciagnie obecne produkty to strzal do api z nimi
+        
+        current_products = []
+
+        for product in all_products:
+            if product['product_code'] in current_products_list:
+                current_products.append(product)
+
+        a.update_file(current_products)
         
         try:
             a.save_file()
@@ -119,13 +127,20 @@ class LoginForm(tk.Tk):
 
 
     def generate_all_products(self):
-        """Fill the excel file with data for all products"""        
+        """Fill the excel file with data for all products"""
+        LabelString.clear_text()             
         self.full_refresh_text.set("Loading...")
         self.product_button.config(state='disable')
         self.full_refresh_button.config(state='disable')
         self.full_refresh_label.update_idletasks()
 
+        # update the excel file here
+        with open('products.json') as f:
+            all_products = json.load(f)
+
         a = ExcelFile('team_lista.xlsx', 'produkty')
+
+        a.update_all_products(all_products)
 
         try:
             a.save_file()
