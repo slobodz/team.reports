@@ -25,7 +25,7 @@ class ExcelFile:
 
         self.product_codes_dict = {
             product_code.value: product_code.row
-            for product_code in self.sheet[self.column_names_dict[self.PRODUCT_CODE]]
+            for product_code in self.sheet[self.column_names_dict[self.PRODUCT_CODE]] if product_code.row != 1
             }
 
 
@@ -44,8 +44,7 @@ class ExcelFile:
 
 
     def list_all_products(self):
-        return [product_code for product_code in self.product_codes_dict
-            if product_code != self.PRODUCT_CODE]
+        return [product_code for product_code in self.product_codes_dict]
 
 
     def save_file(self):
