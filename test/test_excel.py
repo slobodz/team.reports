@@ -1,6 +1,6 @@
 import unittest
 import os
-from team.reports.excel import ExcelFile
+from teamreports.excel import ExcelFile
 
 
 

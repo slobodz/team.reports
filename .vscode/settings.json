@@ -10,5 +10,9 @@
     "python.unitTest.pyTestEnabled": false,
     "python.unitTest.nosetestsEnabled": false,
     "python.unitTest.unittestEnabled": true,
-    "python.linting.pylintArgs": ["--errors-only"]
+    "python.linting.pylintArgs": [
+        "--errors-only"
+    ],
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
 }

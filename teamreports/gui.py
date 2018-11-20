@@ -1,7 +1,10 @@
-#from tkinter import *
 import tkinter as tk
-from team.reports.excel import ExcelFile
+from excel import ExcelFile
 import json
+import requests as r
+
+
+URL = 'https://team-services-uat.herokuapp.com/'
 
 class LoginForm(tk.Tk):
     def __init__(self):
@@ -64,16 +67,20 @@ class LoginForm(tk.Tk):
 
     def submit(self):
         """Send post request with credentials"""
-        LabelString.clear_text()        
+        LabelString.clear_text()      
         self.email_entry.config(state='disable')
         self.password_entry.config(state='disable')
         self.email = self.email_entry.get()
         self.password = self.password_entry.get()
+        self.submit_button.update_idletasks()
 
-        # here send post request to api and get the token if correct or 500 if invalid
 
-        if self.email == "a":
+        headers = {"Username": self.email, "Password": self.password}
+        log_in_request = r.post(URL + 'api/auth/', headers=headers)
+
+        if(log_in_request.ok):
             self.logging_info_text.set("Logged in")
+            self.token = json.loads(log_in_request.text)['token']
             self.logging_info_label.config(fg='green')            
             self.email_entry.config(state='normal')
             self.password_entry.config(state='normal')
@@ -168,6 +175,9 @@ class LabelString(tk.StringVar):
 
 
 
-if __name__ == '__main__':
-    a = LoginForm()
-    a.mainloop()
+# if __name__ == '__main__':
+#     a = LoginForm()
+#     a.mainloop()
+
+a = LoginForm()
+a.mainloop()
