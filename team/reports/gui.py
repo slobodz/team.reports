@@ -168,7 +168,6 @@ class LabelString(tk.StringVar):
 
 
 
-
-
-a = LoginForm()
-a.mainloop()
+if __name__ == '__main__':
+    a = LoginForm()
+    a.mainloop()
