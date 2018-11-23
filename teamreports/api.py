@@ -21,7 +21,7 @@ def get_products(token):
             headers = {
                         "Content-Type": "application/json",
                         "Token": token,
-                        "Page": str(page + 1)}
+                        "Page": str(page + 1)} #because loop starts from 0 but pages starts from 1
             
             chunk = r.get(URL + 'api/product', headers=headers).json()
             product_list.extend(chunk)
@@ -29,6 +29,7 @@ def get_products(token):
         return product_list
     except r.exceptions.ConnectionError as e:
         return 'Cannot connect to the server'
+        raise
 
 
 

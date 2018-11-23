@@ -1,4 +1,5 @@
 import tkinter as tk
+import api
 from excel import ExcelFile
 import json
 import requests as r
@@ -74,13 +75,12 @@ class LoginForm(tk.Tk):
         self.password = self.password_entry.get()
         self.submit_button.update_idletasks()
 
+        self.token_call = api.post_token(email=self.email, password=self.password)
 
-        headers = {"Username": self.email, "Password": self.password}
-        log_in_request = r.post(URL + 'api/auth/', headers=headers)
 
-        if(log_in_request.ok):
+        if(self.token_call.ok):
             self.logging_info_text.set("Logged in")
-            self.token = log_in_request.json()['token']
+            self.token = self.token_call.json()['token']
             self.logging_info_label.config(fg='green')
             self.email_entry.config(state='normal')
             self.password_entry.config(state='normal')
@@ -128,7 +128,7 @@ class LoginForm(tk.Tk):
             a.save_file()
             self.product_text.set("Done!")
         except PermissionError:
-            self.product_text.set("Please close the file!")         
+            self.product_text.set("Please close the file!")
         self.product_button.config(state='normal')
         self.full_refresh_button.config(state='normal')
 
@@ -141,22 +141,28 @@ class LoginForm(tk.Tk):
         self.full_refresh_button.config(state='disable')
         self.full_refresh_label.update_idletasks()
 
-        # update the excel file here
-        with open('products.json') as f:
-            all_products = json.load(f)
-
-        a = ExcelFile('team_lista.xlsx', 'produkty')
-
-        a.update_all_products(all_products)
 
         try:
-            a.save_file()
+            a = ExcelFile('team_lista.xlsx', 'produkty')
+            a.save_file() # check if file is accessable before processing
+
+            self.data_products = api.get_products(token=self.token)
+
+            a.update_all_products(self.data_products)
+
             self.full_refresh_text.set("Done!")
+            self.product_button.config(state='normal')
+            self.full_refresh_button.config(state='normal')
+            a.save_file()
         except PermissionError:
             self.full_refresh_text.set("Please close the file!")
 
-        self.product_button.config(state='normal')               
-        self.full_refresh_button.config(state='normal')
+
+        # update the excel file here
+        # with open('products.json') as f:
+        #     all_products = json.load(f)
+
+
 
 
 class LabelString(tk.StringVar):
