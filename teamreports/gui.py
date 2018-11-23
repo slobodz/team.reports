@@ -80,8 +80,8 @@ class LoginForm(tk.Tk):
 
         if(log_in_request.ok):
             self.logging_info_text.set("Logged in")
-            self.token = json.loads(log_in_request.text)['token']
-            self.logging_info_label.config(fg='green')            
+            self.token = log_in_request.json()['token']
+            self.logging_info_label.config(fg='green')
             self.email_entry.config(state='normal')
             self.password_entry.config(state='normal')
             self.product_button.config(state='normal')
@@ -95,7 +95,7 @@ class LoginForm(tk.Tk):
             self.email_entry.config(state='normal')
             self.password_entry.config(state='normal')
             self.product_button.config(state='disable')
-            self.full_refresh_button.config(state='disable')                  
+            self.full_refresh_button.config(state='disable')
 
 
     def generate_selected_products(self):
