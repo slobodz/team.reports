@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 import api
 from excel import ExcelFile
 import json
@@ -89,6 +90,7 @@ class LoginForm(tk.Tk):
             self.empty_frame.focus()
 
 
+
         else:
             self.logging_info_text.set("Invalid credentials")
             self.logging_info_label.config(fg='red')
@@ -146,7 +148,7 @@ class LoginForm(tk.Tk):
             a = ExcelFile('team_lista.xlsx', 'produkty')
             a.save_file() # check if file is accessable before processing
 
-            self.data_products = api.get_products(token=self.token)
+            self.data_products = api.get_all_products(token='test', self_obj=self)
 
             a.update_all_products(self.data_products)
 
@@ -158,9 +160,11 @@ class LoginForm(tk.Tk):
             self.full_refresh_text.set("Please close the file!")
 
 
-        # update the excel file here
-        # with open('products.json') as f:
-        #     all_products = json.load(f)
+
+    def token_expired(self):
+        self.product_button.config(state='disabled')
+        self.full_refresh_button.config(state='disabled')
+        tk.messagebox.showinfo('Credentials expired', 'Please log in again')
 
 
 
