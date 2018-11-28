@@ -9,8 +9,10 @@ class ExcelFile:
 
     NOT_FOUND_ITEM = '<not found>'
     PRODUCT_CODE = 'product_code'
+    TEMPLATE_FILE_NAME = 'template.xlsx'
+    TEMPLATE_SHEET_NAME = 'products'
 
-    def __init__(self, filename, sheet, target_filename=None):
+    def __init__(self, filename=TEMPLATE_FILE_NAME, sheet=TEMPLATE_SHEET_NAME, target_filename=None):
         self.filename = filename
         self.target_filename = target_filename if target_filename is not None else filename
         self.wb = load_workbook(self.filename)

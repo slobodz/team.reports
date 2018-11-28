@@ -1,9 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
+from threading import Timer
 import api
 from excel import ExcelFile
 import json
 import requests as r
+import time
 
 
 URL = 'https://team-services-uat.herokuapp.com/'
@@ -64,12 +66,15 @@ class LoginForm(tk.Tk):
 
 
 
-
-
+    def close_session(self):
+        self.product_button.config(state='disabled')
+        self.full_refresh_button.config(state='disabled')
+        self.logging_info_text.set("Please log in again")
+        self.logging_info_label.config(fg='black')
 
     def submit(self):
         """Send post request with credentials"""
-        LabelString.clear_text()      
+        LabelString.clear_text()
         self.email_entry.config(state='disable')
         self.password_entry.config(state='disable')
         self.email = self.email_entry.get()
@@ -80,8 +85,11 @@ class LoginForm(tk.Tk):
 
 
         if(self.token_call.ok):
-            self.logging_info_text.set("Logged in")
             self.token = self.token_call.json()['token']
+            self.t = Timer(1800, self.close_session)
+            self.t.start()
+
+            self.logging_info_text.set("Logged in")
             self.logging_info_label.config(fg='green')
             self.email_entry.config(state='normal')
             self.password_entry.config(state='normal')
@@ -145,12 +153,12 @@ class LoginForm(tk.Tk):
 
 
         try:
-            a = ExcelFile('team_lista.xlsx', 'produkty')
+            a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d') + '.xlsx')
             a.save_file() # check if file is accessable before processing
 
-            self.data_products = api.get_all_products(token='test', self_obj=self)
+            data_products = api.get_all_products(token=self.token)
 
-            a.update_all_products(self.data_products)
+            a.update_all_products(data_products)
 
             self.full_refresh_text.set("Done!")
             self.product_button.config(state='normal')
@@ -158,14 +166,6 @@ class LoginForm(tk.Tk):
             a.save_file()
         except PermissionError:
             self.full_refresh_text.set("Please close the file!")
-
-
-
-    def token_expired(self):
-        self.product_button.config(state='disabled')
-        self.full_refresh_button.config(state='disabled')
-        tk.messagebox.showinfo('Credentials expired', 'Please log in again')
-
 
 
 
