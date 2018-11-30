@@ -47,11 +47,7 @@ def get_all_products(token):
                     a = {**one_product, **one_stock} 
                     product_stock_list.append(a)
                     stock_list.pop(id_stock)
-                    product_list.pop(id_prod)
                     break
-
-        for remaining in product_list:
-            product_stock_list.append(remaining)
 
         #merge products+stocks with stocks
         for id_prod, one_product in enumerate(product_stock_list):
@@ -60,11 +56,7 @@ def get_all_products(token):
                     a = {**one_product, **one_price} 
                     product_stock_price_list.append(a)
                     price_list.pop(id_price)
-                    product_stock_list.pop(id_prod)
                     break
-
-        for remaining in product_stock_list:
-            product_stock_price_list.append(remaining)
 
                         
         return product_stock_price_list
@@ -74,28 +66,6 @@ def get_all_products(token):
 
 
 
-a = get_all_products('eyJhbGciOiJIUzI1NiIsImlhdCI6MTU0MzQ0NDQzMCwiZXhwIjoxNTQzNDQ4MDMwfQ.eyJjb25maXJtIjozfQ.U7ib244vfbrEMnYrUyrALqRc5wkmZtx_gjlTzzSYSVU')
+# a = get_all_products('eyJhbGciOiJIUzI1NiIsImlhdCI6MTU0MzQ5NzkyNCwiZXhwIjoxNTQzNTAxNTI0fQ.eyJjb25maXJtIjozfQ.xhz97D6xRSwdE4GhweYjh-Xet33n_UuMs2moNMjVeFE')
 
-print(a)
-# def get_all_prices(token):
-#     try:
-#         page_headers = {"Content-Type": "application/json", "Token": token}
-#         page_info = r.get(URL + 'api/product/price/count', headers=page_headers).json()
-
-#         price_list = []
-#         for page in range(math.ceil(page_info['total_count']/page_info['page_size'])):        
-#             headers = {
-#                         "Content-Type": "application/json",
-#                         "Token": token,
-#                         "Page": str(page + 1)} #because loop starts from 0 but pages starts from 1
-            
-#             chunk = r.get(URL + 'api/product', headers=headers).json()
-#             price_list.extend(chunk)
-
-#         prices_df = pd.DataFrame.from_dict(price_list)
-#         return prices_df
-#     except r.exceptions.ConnectionError as e:
-#         return 'Cannot connect to the server'
-#         raise
-
-# import gui #import LoginForm
+# print(a)
