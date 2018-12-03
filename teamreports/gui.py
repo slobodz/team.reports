@@ -12,6 +12,7 @@ URL = 'https://team-services-uat.herokuapp.com/'
 
 class LoginForm(tk.Tk):
     def __init__(self):
+        """Create an app window with login gui"""
         super().__init__()
 
         self.title("Team Reports")
@@ -116,31 +117,25 @@ class LoginForm(tk.Tk):
         self.full_refresh_button.config(state='disable')
         self.product_label.update_idletasks()
 
-        # update the excel file here
-        with open('products.json') as f:
-            all_products = json.load(f)
-
-
-        a = ExcelFile('team_lista.xlsx', 'produkty')
-
-        current_products_list = a.list_all_products()
-        #tutaj jak sie wyciagnie obecne produkty to strzal do api z nimi
-        
-        current_products = []
-
-        for product in all_products:
-            if product['product_code'] in current_products_list:
-                current_products.append(product)
-
-        a.update_file(current_products)
-        
         try:
-            a.save_file()
+            a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d') + '.xlsx')
+            a.save_file() # check if file is accessable before processing
+
+            selected_products = a.list_all_products()
+
+            #send requests for each product
+            data_products = api.get_selected_products(product_code_list=selected_products, token=self.token)
+
+            a.update_file_with_selected_products(data_products)
+
             self.product_text.set("Done!")
+            self.product_button.config(state='normal')
+            self.full_refresh_button.config(state='normal')
+            a.save_file()
         except PermissionError:
             self.product_text.set("Please close the file!")
-        self.product_button.config(state='normal')
-        self.full_refresh_button.config(state='normal')
+            self.product_button.config(state='normal')
+            self.full_refresh_button.config(state='normal')            
 
 
     def generate_all_products(self):
@@ -158,6 +153,7 @@ class LoginForm(tk.Tk):
 
             data_products = api.get_all_products(token=self.token)
 
+            #populate file with all possible products available for current user(token)
             a.update_all_products(data_products)
 
             self.full_refresh_text.set("Done!")
@@ -166,6 +162,8 @@ class LoginForm(tk.Tk):
             a.save_file()
         except PermissionError:
             self.full_refresh_text.set("Please close the file!")
+            self.product_button.config(state='normal')
+            self.full_refresh_button.config(state='normal')            
 
 
 

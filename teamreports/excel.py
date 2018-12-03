@@ -27,7 +27,8 @@ class ExcelFile:
 
         self.product_codes_dict = {
             product_code.value: product_code.row
-            for product_code in self.sheet[self.column_names_dict[self.PRODUCT_CODE]] if product_code.row != 1
+            for product_code in self.sheet[self.column_names_dict[self.PRODUCT_CODE]]
+            if product_code.row != 1 and product_code.value is not None
             }
 
 
@@ -40,7 +41,7 @@ class ExcelFile:
              = product[item] if item in product else self.NOT_FOUND_ITEM
 
 
-    def update_file(self, product_list):
+    def update_file_with_selected_products(self, product_list):
         for product in product_list:
             self.update_line(product)
 
@@ -68,14 +69,14 @@ class ExcelFile:
 
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
 
-    with open('products.json') as f:
-        all_products = json.load(f)
+#     with open('products.json') as f:
+#         all_products = json.load(f)
 
 
-    a = ExcelFile('team_lista.xlsx', 'produkty')
+#     a = ExcelFile('team_lista.xlsx', 'produkty')
 
-    a.update_file(all_products)
-    a.save_file()
+#     a.update_file(all_products)
+#     a.save_file()
