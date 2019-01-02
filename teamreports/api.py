@@ -22,6 +22,7 @@ def get_all_products(token):
         product_list = []
         stock_list = []
         price_list = []
+        attachment_list = []
         for page in range(math.ceil(page_info['total_count']/page_info['page_size'])):
             headers = {
                         "Content-Type": "application/json",
@@ -37,8 +38,12 @@ def get_all_products(token):
             price_chunk = r.get(URL + 'api/product/price', headers=headers)
             price_list.extend(price_chunk.json())
 
+            attachment_chunk = r.get(URL + 'api/product/attachment', headers=headers)
+            attachment_list.extend(attachment_chunk.json())
+
         product_stock_list = []
         product_stock_price_list = []
+        product_stock_price_att_list = []
 
         #merge products with stocks
         for id_prod, one_product in enumerate(product_list):
@@ -58,6 +63,20 @@ def get_all_products(token):
                     price_list.pop(id_price)
                     break
 
+        #merge products+stocks+prices with metadeta attachment
+        for id_prod, one_product in enumerate(product_stock_price_list):
+            for id_att, one_att in enumerate(attachment_list):
+                if one_product[PRODUCT_CODE] == one_att[PRODUCT_CODE]:
+                    a = {**one_product, **one_att} 
+                    product_stock_price_att_list.append(a)
+                    attachment_list.pop(id_att)
+                    break
+
+
+        for id_prod, product in enumerate(product_stock_price_att_list):
+            photo = r.get(URL + 'api/product/attachment/image/' + product['file_name'], headers={"Token": token})
+            product_stock_price_att_list[id_prod]['photo'] = photo.json()
+
                         
         return product_stock_price_list
     except r.exceptions.ConnectionError as e:
@@ -72,6 +91,7 @@ def get_selected_products(product_code_list, token):
         product_list = []
         stock_list = []
         price_list = []
+        attachment_list = []
         headers = {
                     "Content-Type": "application/json",
                     "Token": token
@@ -94,6 +114,13 @@ def get_selected_products(product_code_list, token):
             price_single = r.get(URL + 'api/product/price/' + product_code, headers=headers)
             if price_single.ok:
                 price_list.append(price_single.json())
+
+            att_single = r.get(URL + 'api/product/attachment/' + product_code, headers=headers)
+            if att_single.ok:
+                attachment_list.append(att_single.json())
+                photo = r.get(URL + 'api/product/attachment/image/' + product_code, headers={"Token": token})
+                product_stock_price_att_list[id_prod]['photo'] = photo
+
 
 
 
