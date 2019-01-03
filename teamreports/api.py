@@ -75,10 +75,10 @@ def get_all_products(token):
 
         for id_prod, product in enumerate(product_stock_price_att_list):
             photo = r.get(URL + 'api/product/attachment/image/' + product['file_name'], headers={"Token": token})
-            product_stock_price_att_list[id_prod]['photo'] = photo.json()
+            product_stock_price_att_list[id_prod]['photo'] = photo.text
 
                         
-        return product_stock_price_list
+        return product_stock_price_att_list
     except r.exceptions.ConnectionError as e:
         return 'Cannot connect to the server'
         raise
@@ -92,6 +92,7 @@ def get_selected_products(product_code_list, token):
         stock_list = []
         price_list = []
         attachment_list = []
+        photo_list = []        
         headers = {
                     "Content-Type": "application/json",
                     "Token": token
@@ -99,51 +100,82 @@ def get_selected_products(product_code_list, token):
 
         product_stock_list = []
         product_stock_price_list = []
-        
+        product_stock_price_att_list = []
+        product_stock_price_att_photo_list = []        
+
         for product_code in product_code_list:
             product_single = r.get(URL + 'api/product/' + product_code, headers=headers)
             if product_single.ok:
                 product_list.append(product_single.json())
+
+                stock_single = r.get(URL + 'api/product/stock/' + product_code, headers=headers)
+                if stock_single.ok:       
+                    stock_list.append(stock_single.json())
+
+                price_single = r.get(URL + 'api/product/price/' + product_code, headers=headers)
+                if price_single.ok:
+                    price_list.append(price_single.json())
+
+                att_single = r.get(URL + 'api/product/attachment/' + product_code, headers=headers)
+                if att_single.ok:
+                    attachment_list.append(att_single.json())
+                    photo = r.get(URL + 'api/product/attachment/image/' + product_code, headers={"Token": token})
+                    if photo.ok:
+                        photo_list.append({PRODUCT_CODE: product_code, 'photo': photo.text})
             else:
-                product_stock_price_list.append({PRODUCT_CODE:product_code}) #append dict with product_code only so the rest attributes will be marked as not found
-
-            stock_single = r.get(URL + 'api/product/stock/' + product_code, headers=headers)
-            if stock_single.ok:       
-                stock_list.append(stock_single.json())
-
-            price_single = r.get(URL + 'api/product/price/' + product_code, headers=headers)
-            if price_single.ok:
-                price_list.append(price_single.json())
-
-            att_single = r.get(URL + 'api/product/attachment/' + product_code, headers=headers)
-            if att_single.ok:
-                attachment_list.append(att_single.json())
-                photo = r.get(URL + 'api/product/attachment/image/' + product_code, headers={"Token": token})
-                product_stock_price_att_list[id_prod]['photo'] = photo
-
-
+                product_stock_price_att_photo_list.append({PRODUCT_CODE:product_code}) #append dict with product_code only so the rest attributes will be marked as not found
 
 
         #merge products with stocks
-        for id_prod, one_product in enumerate(product_list):
-            for id_stock, one_stock in enumerate(stock_list):
-                if one_product[PRODUCT_CODE] == one_stock[PRODUCT_CODE]:
-                    a = {**one_product, **one_stock} 
-                    product_stock_list.append(a)
-                    stock_list.pop(id_stock)
-                    break
+        if not stock_list:
+            product_stock_list = product_list
+        else:
+            for id_prod, one_product in enumerate(product_list):
+                for id_stock, one_stock in enumerate(stock_list):
+                    if one_product[PRODUCT_CODE] == one_stock[PRODUCT_CODE]:
+                        a = {**one_product, **one_stock} 
+                        product_stock_list.append(a)
+                        stock_list.pop(id_stock)
+                        break
 
         #merge products+stocks with prices
-        for id_prod, one_product in enumerate(product_stock_list):
-            for id_price, one_price in enumerate(price_list):
-                if one_product[PRODUCT_CODE] == one_price[PRODUCT_CODE]:
-                    a = {**one_product, **one_price} 
-                    product_stock_price_list.append(a)
-                    price_list.pop(id_price)
-                    break
+        if not price_list:
+            product_stock_price_list = product_stock_list
+        else:        
+            for id_prod, one_product in enumerate(product_stock_list):
+                for id_price, one_price in enumerate(price_list):
+                    if one_product[PRODUCT_CODE] == one_price[PRODUCT_CODE]:
+                        a = {**one_product, **one_price} 
+                        product_stock_price_list.append(a)
+                        price_list.pop(id_price)
+                        break
+
+        #merge products+stocks+prices with metadeta attachment
+        if not attachment_list:
+            product_stock_price_att_list = product_stock_price_list
+        else:        
+            for id_prod, one_product in enumerate(product_stock_price_list):
+                for id_att, one_att in enumerate(attachment_list):
+                    if one_product[PRODUCT_CODE] == one_att[PRODUCT_CODE]:
+                        a = {**one_product, **one_att} 
+                        product_stock_price_att_list.append(a)
+                        attachment_list.pop(id_att)
+                        break
+
+        #merge products+stocks+prices+att with photo
+        if not photo_list:
+            product_stock_price_att_photo_list = product_stock_price_att_list
+        else:        
+            for id_prod, one_product in enumerate(product_stock_price_att_list):
+                for id_photo, one_photo in enumerate(photo_list):
+                    if one_product[PRODUCT_CODE] == one_photo[PRODUCT_CODE]:
+                        a = {**one_product, **one_photo} 
+                        product_stock_price_att_photo_list.append(a)
+                        photo_list.pop(id_photo)
+                        break
 
                         
-        return product_stock_price_list
+        return product_stock_price_att_photo_list
     except r.exceptions.ConnectionError as e:
         return 'Cannot connect to the server'
         raise
