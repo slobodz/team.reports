@@ -1,6 +1,9 @@
 from openpyxl import load_workbook
+from openpyxl.drawing.image import Image as exImage
 import json
-
+from PIL import Image
+from io import BytesIO
+import os
 
 class ExcelFile:
     """ Load the template xlsx file which contains product_code list
@@ -9,8 +12,10 @@ class ExcelFile:
 
     NOT_FOUND_ITEM = '<not found>'
     PRODUCT_CODE = 'product_code'
+    PHOTO_CODE = 'photo'
     TEMPLATE_FILE_NAME = 'template.xlsx'
     TEMPLATE_SHEET_NAME = 'products'
+    TEMP_IMG_FILE_NAME = 'temp.jpeg'
 
     def __init__(self, filename=TEMPLATE_FILE_NAME, sheet=TEMPLATE_SHEET_NAME, target_filename=None):
         self.filename = filename
@@ -37,8 +42,17 @@ class ExcelFile:
                                 else str(row)
 
         for item in self.column_names_dict:
-            self.sheet[self.column_names_dict[item] + _current_product_code] \
-             = product[item] if item in product else self.NOT_FOUND_ITEM
+            _current_column = self.column_names_dict[item]
+            _current_cell = _current_column + _current_product_code
+            if(item == self.PHOTO_CODE and item in product):
+                img = Image.open(BytesIO(product[item])) #change bytes from request into image obj
+                img.save(self.TEMP_IMG_FILE_NAME) #save image on the disk
+                img = exImage(self.TEMP_IMG_FILE_NAME) #locate image using openpyxl
+                self.sheet.column_dimensions[_current_column].width = (img.width/7)
+                self.sheet.row_dimensions[int(_current_product_code)].height = (img.height * 0.75)                
+                self.sheet.add_image(img, _current_cell) #insert image
+            else:
+                self.sheet[_current_cell] = product[item] if item in product else self.NOT_FOUND_ITEM
 
 
     def update_file_with_selected_products(self, product_list):
@@ -53,6 +67,8 @@ class ExcelFile:
     def save_file(self):
         self.wb.close()
         self.wb.save(self.target_filename)
+        if os.path.exists(self.TEMP_IMG_FILE_NAME):
+            os.remove(self.TEMP_IMG_FILE_NAME)
 
 
     def update_all_products(self, product_list):

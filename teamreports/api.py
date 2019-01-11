@@ -1,5 +1,7 @@
 import requests as r
 import math
+from PIL import Image
+from io import BytesIO
 
 
 URL = 'https://team-services-uat.herokuapp.com/'
@@ -75,7 +77,9 @@ def get_all_products(token):
 
         for id_prod, product in enumerate(product_stock_price_att_list):
             photo = r.get(URL + 'api/product/attachment/image/' + product['file_name'], headers={"Token": token})
-            product_stock_price_att_list[id_prod]['photo'] = photo.text
+            if(photo.ok):
+                img = Image.open(BytesIO(photo.content))
+                product_stock_price_att_list[id_prod]['photo'] = img
 
                         
         return product_stock_price_att_list
@@ -104,24 +108,29 @@ def get_selected_products(product_code_list, token):
         product_stock_price_att_photo_list = []        
 
         for product_code in product_code_list:
-            product_single = r.get(URL + 'api/product/' + product_code, headers=headers)
+            product_single = r.get(URL + 'api/product/search', headers={
+                                                                        "Content-Type": "application/json",
+                                                                        "Token": token,
+                                                                        "Productcode": product_code
+                                                                    })
             if product_single.ok:
                 product_list.append(product_single.json())
+                product_id = str(product_single.json()['product_id'])
 
-                stock_single = r.get(URL + 'api/product/stock/' + product_code, headers=headers)
+                stock_single = r.get(URL + 'api/product/stock/' + product_id, headers=headers)
                 if stock_single.ok:       
                     stock_list.append(stock_single.json())
 
-                price_single = r.get(URL + 'api/product/price/' + product_code, headers=headers)
+                price_single = r.get(URL + 'api/product/price/' + product_id, headers=headers)
                 if price_single.ok:
                     price_list.append(price_single.json())
 
-                att_single = r.get(URL + 'api/product/attachment/' + product_code, headers=headers)
+                att_single = r.get(URL + 'api/product/attachment/' + product_id, headers=headers)
                 if att_single.ok:
                     attachment_list.append(att_single.json())
-                    photo = r.get(URL + 'api/product/attachment/image/' + product_code, headers={"Token": token})
+                    photo = r.get(URL + 'api/product/attachment/image/' + att_single.json()['file_name'], headers={"Token": token})
                     if photo.ok:
-                        photo_list.append({PRODUCT_CODE: product_code, 'photo': photo.text})
+                        photo_list.append({PRODUCT_CODE: product_code, 'photo': photo.content})
             else:
                 product_stock_price_att_photo_list.append({PRODUCT_CODE:product_code}) #append dict with product_code only so the rest attributes will be marked as not found
 

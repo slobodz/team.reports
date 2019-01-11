@@ -2,3 +2,4 @@ nose
 openpyxl
 requests
 pandas
+Pillow
