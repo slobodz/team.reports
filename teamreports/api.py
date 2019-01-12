@@ -76,12 +76,11 @@ def get_all_products(token):
 
 
         for id_prod, product in enumerate(product_stock_price_att_list):
-            photo = r.get(URL + 'api/product/attachment/image/' + product['file_name'], headers={"Token": token})
-            if(photo.ok):
-                img = Image.open(BytesIO(photo.content))
-                product_stock_price_att_list[id_prod]['photo'] = img
-
-                        
+            if product['file_name']:
+                photo = r.get(URL + 'api/product/attachment/image/' + product['file_name'], headers={"Token": token})
+                if(photo.ok):
+                    product_stock_price_att_list[id_prod]['photo'] = photo.content
+                
         return product_stock_price_att_list
     except r.exceptions.ConnectionError as e:
         return 'Cannot connect to the server'

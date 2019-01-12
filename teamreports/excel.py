@@ -38,18 +38,17 @@ class ExcelFile:
 
 
     def update_line(self, product, row=None):
-        _current_product_code = str(self.product_codes_dict[product[self.PRODUCT_CODE]]) if row is None \
-                                else str(row)
+        _current_row = self.product_codes_dict[product[self.PRODUCT_CODE]] if row is None else row
 
         for item in self.column_names_dict:
             _current_column = self.column_names_dict[item]
-            _current_cell = _current_column + _current_product_code
+            _current_cell = _current_column + str(_current_row)
             if(item == self.PHOTO_CODE and item in product):
                 img = Image.open(BytesIO(product[item])) #change bytes from request into image obj
                 img.save(self.TEMP_IMG_FILE_NAME) #save image on the disk
                 img = exImage(self.TEMP_IMG_FILE_NAME) #locate image using openpyxl
                 self.sheet.column_dimensions[_current_column].width = (img.width/7)
-                self.sheet.row_dimensions[int(_current_product_code)].height = (img.height * 0.75)                
+                self.sheet.row_dimensions[_current_row].height = (img.height *0.75)                
                 self.sheet.add_image(img, _current_cell) #insert image
             else:
                 self.sheet[_current_cell] = product[item] if item in product else self.NOT_FOUND_ITEM
