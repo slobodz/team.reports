@@ -16,6 +16,18 @@ def post_token(email, password):
         return 'Cannot connect to the server'
 
 
+def merge_lists_of_dicts(list1, list2):
+    merged_list = []
+    for id_list1, one_dict_list1 in enumerate(list1):
+        for id_list2, one_dict_list2 in enumerate(list2):
+            if one_dict_list1[PRODUCT_CODE] == one_dict_list2[PRODUCT_CODE]:
+                a = {**one_dict_list1, **one_dict_list2} 
+                merged_list.append(a)
+                list2.pop(id_list2)
+                break
+    return merged_list
+
+
 def get_all_products(token):
     try:
         page_headers = {"Content-Type": "application/json", "Token": token}

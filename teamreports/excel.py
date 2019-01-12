@@ -47,8 +47,8 @@ class ExcelFile:
                 img = Image.open(BytesIO(product[item])) #change bytes from request into image obj
                 img.save(self.TEMP_IMG_FILE_NAME) #save image on the disk
                 img = exImage(self.TEMP_IMG_FILE_NAME) #locate image using openpyxl
-                self.sheet.column_dimensions[_current_column].width = (img.width/7)
-                self.sheet.row_dimensions[_current_row].height = (img.height *0.75)                
+                self.sheet.column_dimensions[_current_column].width = (img.width/7) #experimental
+                self.sheet.row_dimensions[_current_row].height = (img.height *0.75) #experimental  
                 self.sheet.add_image(img, _current_cell) #insert image
             else:
                 self.sheet[_current_cell] = product[item] if item in product else self.NOT_FOUND_ITEM
