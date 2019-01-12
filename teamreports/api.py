@@ -19,12 +19,18 @@ def post_token(email, password):
 def merge_lists_of_dicts(list1, list2):
     merged_list = []
     for id_list1, one_dict_list1 in enumerate(list1):
+        is_key_in_list2 = False
         for id_list2, one_dict_list2 in enumerate(list2):
             if one_dict_list1[PRODUCT_CODE] == one_dict_list2[PRODUCT_CODE]:
                 a = {**one_dict_list1, **one_dict_list2} 
                 merged_list.append(a)
                 list2.pop(id_list2)
+                is_key_in_list2 = True
                 break
+        if not is_key_in_list2:
+            merged_list.append(one_dict_list1)
+
+
     return merged_list
 
 
@@ -55,38 +61,16 @@ def get_all_products(token):
             attachment_chunk = r.get(URL + 'api/product/attachment', headers=headers)
             attachment_list.extend(attachment_chunk.json())
 
-        product_stock_list = []
-        product_stock_price_list = []
-        product_stock_price_att_list = []
-
         #merge products with stocks
-        for id_prod, one_product in enumerate(product_list):
-            for id_stock, one_stock in enumerate(stock_list):
-                if one_product[PRODUCT_CODE] == one_stock[PRODUCT_CODE]:
-                    a = {**one_product, **one_stock} 
-                    product_stock_list.append(a)
-                    stock_list.pop(id_stock)
-                    break
+        product_stock_list = merge_lists_of_dicts(product_list, stock_list)
 
         #merge products+stocks with prices
-        for id_prod, one_product in enumerate(product_stock_list):
-            for id_price, one_price in enumerate(price_list):
-                if one_product[PRODUCT_CODE] == one_price[PRODUCT_CODE]:
-                    a = {**one_product, **one_price} 
-                    product_stock_price_list.append(a)
-                    price_list.pop(id_price)
-                    break
+        product_stock_price_list = merge_lists_of_dicts(product_stock_list, price_list)
 
         #merge products+stocks+prices with metadeta attachment
-        for id_prod, one_product in enumerate(product_stock_price_list):
-            for id_att, one_att in enumerate(attachment_list):
-                if one_product[PRODUCT_CODE] == one_att[PRODUCT_CODE]:
-                    a = {**one_product, **one_att} 
-                    product_stock_price_att_list.append(a)
-                    attachment_list.pop(id_att)
-                    break
+        product_stock_price_att_list = merge_lists_of_dicts(product_stock_price_list, attachment_list)
 
-
+        #merge products+stocks+prices+att with photos
         for id_prod, product in enumerate(product_stock_price_att_list):
             if product['file_name']:
                 photo = r.get(URL + 'api/product/attachment/image/' + product['file_name'], headers={"Token": token})
@@ -112,11 +96,7 @@ def get_selected_products(product_code_list, token):
                     "Content-Type": "application/json",
                     "Token": token
                 }
-
-        product_stock_list = []
-        product_stock_price_list = []
-        product_stock_price_att_list = []
-        product_stock_price_att_photo_list = []        
+   
 
         for product_code in product_code_list:
             product_single = r.get(URL + 'api/product/search', headers={
@@ -143,56 +123,36 @@ def get_selected_products(product_code_list, token):
                     if photo.ok:
                         photo_list.append({PRODUCT_CODE: product_code, 'photo': photo.content})
             else:
-                product_stock_price_att_photo_list.append({PRODUCT_CODE:product_code}) #append dict with product_code only so the rest attributes will be marked as not found
+                product_list.append({PRODUCT_CODE:product_code}) #append dict with product_code only so the rest attributes will be marked as not found
 
 
         #merge products with stocks
         if not stock_list:
             product_stock_list = product_list
         else:
-            for id_prod, one_product in enumerate(product_list):
-                for id_stock, one_stock in enumerate(stock_list):
-                    if one_product[PRODUCT_CODE] == one_stock[PRODUCT_CODE]:
-                        a = {**one_product, **one_stock} 
-                        product_stock_list.append(a)
-                        stock_list.pop(id_stock)
-                        break
+            product_stock_list = merge_lists_of_dicts(product_list, stock_list)
+
 
         #merge products+stocks with prices
         if not price_list:
             product_stock_price_list = product_stock_list
         else:        
-            for id_prod, one_product in enumerate(product_stock_list):
-                for id_price, one_price in enumerate(price_list):
-                    if one_product[PRODUCT_CODE] == one_price[PRODUCT_CODE]:
-                        a = {**one_product, **one_price} 
-                        product_stock_price_list.append(a)
-                        price_list.pop(id_price)
-                        break
+            product_stock_price_list = merge_lists_of_dicts(product_stock_list, price_list)
+
 
         #merge products+stocks+prices with metadeta attachment
         if not attachment_list:
             product_stock_price_att_list = product_stock_price_list
         else:        
-            for id_prod, one_product in enumerate(product_stock_price_list):
-                for id_att, one_att in enumerate(attachment_list):
-                    if one_product[PRODUCT_CODE] == one_att[PRODUCT_CODE]:
-                        a = {**one_product, **one_att} 
-                        product_stock_price_att_list.append(a)
-                        attachment_list.pop(id_att)
-                        break
+            product_stock_price_att_list = merge_lists_of_dicts(product_stock_price_list, attachment_list)
+
 
         #merge products+stocks+prices+att with photo
         if not photo_list:
             product_stock_price_att_photo_list = product_stock_price_att_list
         else:        
-            for id_prod, one_product in enumerate(product_stock_price_att_list):
-                for id_photo, one_photo in enumerate(photo_list):
-                    if one_product[PRODUCT_CODE] == one_photo[PRODUCT_CODE]:
-                        a = {**one_product, **one_photo} 
-                        product_stock_price_att_photo_list.append(a)
-                        photo_list.pop(id_photo)
-                        break
+            product_stock_price_att_photo_list = merge_lists_of_dicts(product_stock_price_att_list, photo_list)            
+
 
                         
         return product_stock_price_att_photo_list
