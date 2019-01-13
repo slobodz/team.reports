@@ -1,14 +1,15 @@
 import tkinter as tk
 from tkinter import messagebox
 from threading import Timer
-import api
-from excel import ExcelFile
 import json
 import requests as r
 import time
+from teamreports import api
+from teamreports import app_config
+from teamreports.excel import ExcelFile
 
 
-URL = 'https://team-services-uat.herokuapp.com/'
+URL = app_config.URL
 
 class LoginForm(tk.Tk):
     def __init__(self):
@@ -187,5 +188,3 @@ class LabelString(tk.StringVar):
 #     a = LoginForm()
 #     a.mainloop()
 
-a = LoginForm()
-a.mainloop()

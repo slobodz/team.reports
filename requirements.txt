@@ -1,5 +1,5 @@
-nose
 openpyxl
 requests
 pandas
 Pillow
+pyinstaller

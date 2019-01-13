@@ -1,4 +1,4 @@
-# team/reports/config.py
+# team/reports/appconfig.py
 
 import os
 
@@ -25,6 +25,11 @@ class ProductionConfig:
     API_PWD = os.getenv('APP_SETTINGS_API_PWD')
     URL = os.getenv('APP_SETTINGS_URL')
     LOG_LOCATION = os.getenv('APP_SETTINGS_LOG_LOCATION')
+
+class HerokuConfig:
+    DEBUG = True
+    URL = 'https://team-services-uat.herokuapp.com/'
+
 
     
 

@@ -3,8 +3,8 @@
 block_cipher = None
 
 
-a = Analysis(['gui.py'],
-             pathex=['D:\\WORK\\git\\team.reports\\team\\reports'],
+a = Analysis(['run.py'],
+             pathex=['D:\\WORK\\git\\team.reports'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -23,7 +23,7 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,
           [],
-          name='gui',
+          name='run',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,

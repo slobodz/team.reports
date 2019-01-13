@@ -2,9 +2,9 @@ import requests as r
 import math
 from PIL import Image
 from io import BytesIO
+from teamreports import app_config
 
-
-URL = 'https://team-services-uat.herokuapp.com/'
+URL = app_config.URL
 PRODUCT_CODE = 'product_code'
 
 def post_token(email, password):
