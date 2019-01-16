@@ -14,7 +14,7 @@ def reqs(fname):
 
 #path to package __init__ file with version
 init = os.path.join(
-    os.path.dirname(__file__), 'team', '__init__.py'
+    os.path.dirname(__file__), 'teamreports', '__init__.py'
 )
 
 version_line = list(

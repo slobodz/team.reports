@@ -1,0 +1,11 @@
+MANIFEST.in
+README.md
+requirements.txt
+setup.py
+bin/run-team.reports.py
+team.reports.egg-info/PKG-INFO
+team.reports.egg-info/SOURCES.txt
+team.reports.egg-info/dependency_links.txt
+team.reports.egg-info/requires.txt
+team.reports.egg-info/top_level.txt
+test/test_excel.py

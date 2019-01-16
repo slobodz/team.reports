@@ -1,0 +1,26 @@
+Metadata-Version: 1.1
+Name: team.reports
+Version: 0.0.0
+Summary: Data reports to TeamServices module
+Home-page: http://packages.python.org/team.datasync
+Author: Piotr Purwin
+Author-email: build.teamexport@gmail.com
+License: BSD
+Description: ##upgrade
+        #python -m pip install --user --upgrade setuptools wheel
+        #
+        ## build
+        #python setup.py sdist bdist_wheel
+        #
+        ##install whl
+        #pip install *.whl
+        #
+        #pip install C:\Project\team.datasync\dist\team.reports-0.0.1-py3-none-any.whl
+        
+        
+        pyinstaller --onefile --windowed teamreports\run.py
+Keywords: example documentation tutorial
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Topic :: Utilities
+Classifier: License :: OSI Approved :: BSD License

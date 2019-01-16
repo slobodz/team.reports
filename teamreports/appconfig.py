@@ -10,6 +10,14 @@ class DevelopmentConfig:
     URL = 'http://127.0.0.1:5000/'
     LOG_LOCATION = 'C:\Project\TeamAssets\deploy\Logs'
 
+class DockerConfig:
+    """Development configuration."""
+    DEBUG = True
+    API_USERNAME = 'a@pi.com'
+    API_PWD = 'api123'
+    URL = 'http://127.0.0.1:8000/'
+    LOG_LOCATION = 'C:\Project\deploy\Logs'    
+
 class TestConfig:
     """Development slawek configuration."""
     DEBUG = True
