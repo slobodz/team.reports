@@ -80,16 +80,17 @@ async def get_all_async(headers_for_all):
             attachment_task = asyncio.ensure_future(fetch(URL + 'api/product/attachment', headers, session))
             attachment_tasks.append(attachment_task)
 
-        product_responses = await asyncio.gather(*product_tasks)
-        stock_responses = await asyncio.gather(*stock_tasks)
-        price_responses = await asyncio.gather(*price_tasks)
-        attachment_responses = await asyncio.gather(*attachment_tasks)
+        product_responses = asyncio.gather(*product_tasks)
+        stock_responses = asyncio.gather(*stock_tasks)
+        price_responses = asyncio.gather(*price_tasks)
+        attachment_responses = asyncio.gather(*attachment_tasks)
+        all_resp = await asyncio.gather(product_responses, stock_responses, price_responses, attachment_responses)
 
     return (
-            [product for sublist in product_responses for product in sublist],
-            [stock for sublist in stock_responses for stock in sublist],
-            [price for sublist in price_responses for price in sublist],
-            [attachment for sublist in attachment_responses for attachment in sublist]
+            [product for sublist in all_resp[0] for product in sublist],
+            [stock for sublist in all_resp[1] for stock in sublist],
+            [price for sublist in all_resp[2] for price in sublist],
+            [attachment for sublist in all_resp[3] for attachment in sublist]
         )
 
 
