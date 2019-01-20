@@ -1,4 +1,11 @@
-import os
+import os, sys
+
+print(sys.path)
+
+sys.path.append(r'D:\WORK\git\team.reports')
+
+
+#import os
 from teamreports import appconfig
 
 VERSION = (0,0,)

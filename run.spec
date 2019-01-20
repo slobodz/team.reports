@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['run.py'],
-             pathex=['C:\\Project\\team\\team.reports'],
+             pathex=['D:\\WORK\\git\\team.reports'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -29,4 +29,4 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           runtime_tmpdir=None,
-          console=False )
+          console=True )

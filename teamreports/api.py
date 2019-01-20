@@ -17,21 +17,39 @@ def post_token(email, password):
 
 
 def merge_lists_of_dicts(list1, list2):
-    merged_list = []
-    for id_list1, one_dict_list1 in enumerate(list1):
-        is_key_in_list2 = False
-        for id_list2, one_dict_list2 in enumerate(list2):
-            if one_dict_list1[PRODUCT_CODE] == one_dict_list2[PRODUCT_CODE]:
-                a = {**one_dict_list1, **one_dict_list2} 
-                merged_list.append(a)
-                list2.pop(id_list2)
-                is_key_in_list2 = True
-                break
-        if not is_key_in_list2:
-            merged_list.append(one_dict_list1)
+    try:
+        merged_list = []
+        if list1:
+            for id_list1, one_dict_list1 in enumerate(list1):
+                is_key_in_list2 = False
+                for id_list2, one_dict_list2 in enumerate(list2):
+                    if one_dict_list1[PRODUCT_CODE] == one_dict_list2[PRODUCT_CODE]:
+                        a = {**one_dict_list1, **one_dict_list2} 
+                        merged_list.append(a)
+                        list2.pop(id_list2)
+                        is_key_in_list2 = True
+                        break
+                if not is_key_in_list2:
+                    merged_list.append(one_dict_list1)
+            return merged_list
+        else:
+            return list2
+    except Exception as e:
+        print(e)
 
 
-    return merged_list
+
+def get_request(endpoint, headers, output):
+    #a = r.get(URL + lista[0]endpoint, headers=headers)
+    #a = r.get(URL + lista[0], headers=lista[1])
+    #if a.ok:
+    #    lista[2].put(a.json())
+    #else:
+    #    return None
+    #return lista**2
+    a = r.get(URL + endpoint, headers=headers)
+    output.put(a.json())
+
 
 
 def get_all_products(token):
@@ -49,17 +67,57 @@ def get_all_products(token):
                         "Token": token,
                         "Page": str(page + 1)} #because loop starts from 0 but pages starts from 1
             
+
+            # output = mp.Queue()
+
+
+            # urls = [['api/product', headers, output], ['api/product/stock', headers, output], ['api/product/price', headers, output], ['api/product/attachment', headers, output]]
+
+            # urls = [1,2,3,4]
+
+            # processes = [mp.Process(target=get_request, args=('api/product', headers, output)),
+            #             mp.Process(target=get_request, args=('api/product/stock', headers, output)),
+            #             mp.Process(target=get_request, args=('api/product/price', headers, output)),
+            #             mp.Process(target=get_request, args=('api/product/attachment', headers, output))
+            # ]
+
+            # # Run processes
+            # for p in processes:
+            #     p.start()
+
+            # # Exit the completed processes
+            # # for p in processes:
+            # #     p.join()
+
+            # # Get process results from the output queue
+            # results = [output.get() for p in processes]            
+
+
+
+            # # pool = Pool(processes=4)
+            # # results = pool.map(get_request, urls)
+
+
             product_chunk = r.get(URL + 'api/product', headers=headers)
-            product_list.extend(product_chunk.json())
+
+            #product_chunk = Process(target=r.get, args(URL + 'api/product', headers=headers,))
+            #product_chunk.start()
+
+
+            if product_chunk.ok:
+                product_list.extend(product_chunk.json())
 
             stock_chunk = r.get(URL + 'api/product/stock', headers=headers)
-            stock_list.extend(stock_chunk.json())
+            if stock_chunk.ok:
+                stock_list.extend(stock_chunk.json())
 
             price_chunk = r.get(URL + 'api/product/price', headers=headers)
-            price_list.extend(price_chunk.json())
+            if price_chunk.ok:
+                price_list.extend(price_chunk.json())
 
             attachment_chunk = r.get(URL + 'api/product/attachment', headers=headers)
-            attachment_list.extend(attachment_chunk.json())
+            if attachment_chunk.ok:
+                attachment_list.extend(attachment_chunk.json())
 
         #merge products with stocks
         product_stock_list = merge_lists_of_dicts(product_list, stock_list)
@@ -159,3 +217,6 @@ def get_selected_products(product_code_list, token):
     except r.exceptions.ConnectionError as e:
         return 'Cannot connect to the server'
         raise
+
+
+
