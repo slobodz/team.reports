@@ -3,6 +3,8 @@ import math
 from PIL import Image
 from io import BytesIO
 from teamreports import app_config
+import asyncio
+from aiohttp import ClientSession
 
 URL = app_config.URL
 PRODUCT_CODE = 'product_code'
@@ -51,21 +53,79 @@ def get_request(endpoint, headers, output):
     output.put(a.json())
 
 
+async def fetch(url, headers, session):
+    async with session.get(url, params=headers) as response:
+        if(response.reason == 'OK'):
+            return await response.json()
+
+async def get_all_async(headers_for_all):
+    product_tasks = []
+    stock_tasks = []
+    price_tasks = []
+    attachment_tasks = []
+
+ # Fetch all responses within one Client session,
+ # keep connection alive for all requests.
+    async with ClientSession() as session:
+        for headers in headers_for_all:
+            product_task = asyncio.ensure_future(fetch(URL + 'api/product', headers, session))
+            product_tasks.append(product_task)
+            
+            stock_task = asyncio.ensure_future(fetch(URL + 'api/product/stock', headers, session))
+            stock_tasks.append(stock_task)
+
+            price_task = asyncio.ensure_future(fetch(URL + 'api/product/price', headers, session))
+            price_tasks.append(price_task)
+
+            attachment_task = asyncio.ensure_future(fetch(URL + 'api/product/attachment', headers, session))
+            attachment_tasks.append(attachment_task)
+
+        product_responses = await asyncio.gather(*product_tasks)
+        stock_responses = await asyncio.gather(*stock_tasks)
+        price_responses = await asyncio.gather(*price_tasks)
+        attachment_responses = await asyncio.gather(*attachment_tasks)
+
+    return (
+            [product for sublist in product_responses for product in sublist],
+            [stock for sublist in stock_responses for stock in sublist],
+            [price for sublist in price_responses for price in sublist],
+            [attachment for sublist in attachment_responses for attachment in sublist]
+        )
+
+
+ #lista.extend(responses)
+ #return responses
+    
+     #print(responses)
+     # you now have all response bodies in this variable
+
+
 
 def get_all_products(token):
     try:
         page_headers = {"Content-Type": "application/json", "Token": token}
         page_info = r.get(URL + 'api/product/count', headers=page_headers).json()
+        how_many_pages = math.ceil(page_info['total_count']/page_info['page_size'])
+        headers_for_all = [{
+                            "Content-Type": "application/json",
+                            "Token": token,
+                            "Page": str(i + 1)} #because loop starts from 0 but pages starts from 1
+                            for i in range(how_many_pages)]
 
-        product_list = []
-        stock_list = []
-        price_list = []
-        attachment_list = []
-        for page in range(math.ceil(page_info['total_count']/page_info['page_size'])):
-            headers = {
-                        "Content-Type": "application/json",
-                        "Token": token,
-                        "Page": str(page + 1)} #because loop starts from 0 but pages starts from 1
+
+        loop = asyncio.get_event_loop()
+        future = asyncio.ensure_future(get_all_async(headers_for_all))
+        loop.run_until_complete(future)
+
+
+        product_list = future.result()
+        #, stock_list, price_list, attachment_list
+
+        # for page in range():
+        #     headers = {
+        #                 "Content-Type": "application/json",
+        #                 "Token": token,
+        #                 "Page": str(page + 1)} #because loop starts from 0 but pages starts from 1
             
 
             # output = mp.Queue()
@@ -98,26 +158,31 @@ def get_all_products(token):
             # # results = pool.map(get_request, urls)
 
 
-            product_chunk = r.get(URL + 'api/product', headers=headers)
+            # product_chunk = r.get(URL + 'api/product', headers=headers)
 
-            #product_chunk = Process(target=r.get, args(URL + 'api/product', headers=headers,))
-            #product_chunk.start()
+            # #product_chunk = Process(target=r.get, args(URL + 'api/product', headers=headers,))
+            # #product_chunk.start()
 
 
-            if product_chunk.ok:
-                product_list.extend(product_chunk.json())
+            # if product_chunk.ok:
+            #     product_list.extend(product_chunk.json())
 
-            stock_chunk = r.get(URL + 'api/product/stock', headers=headers)
-            if stock_chunk.ok:
-                stock_list.extend(stock_chunk.json())
+            # stock_chunk = r.get(URL + 'api/product/stock', headers=headers)
+            # if stock_chunk.ok:
+            #     stock_list.extend(stock_chunk.json())
 
-            price_chunk = r.get(URL + 'api/product/price', headers=headers)
-            if price_chunk.ok:
-                price_list.extend(price_chunk.json())
+            # price_chunk = r.get(URL + 'api/product/price', headers=headers)
+            # if price_chunk.ok:
+            #     price_list.extend(price_chunk.json())
 
-            attachment_chunk = r.get(URL + 'api/product/attachment', headers=headers)
-            if attachment_chunk.ok:
-                attachment_list.extend(attachment_chunk.json())
+            # attachment_chunk = r.get(URL + 'api/product/attachment', headers=headers)
+            # if attachment_chunk.ok:
+            #     attachment_list.extend(attachment_chunk.json())
+
+
+
+
+
 
         #merge products with stocks
         product_stock_list = merge_lists_of_dicts(product_list, stock_list)

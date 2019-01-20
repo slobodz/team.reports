@@ -12,7 +12,7 @@ async def run(r):
     url = 'https://team-services-uat.herokuapp.com/api/product'
     headers = {
              "Content-Type": "application/json",
-             "Token": 'eyJhbGciOiJIUzI1NiIsImlhdCI6MTU0Nzg1MTA2NCwiZXhwIjoxNTQ3ODU0NjY0fQ.eyJjb25maXJtIjoyfQ.yY2pHaQWVCxx-3Z2engIny0iVYFhvwzowUjRSCSfar8',
+             "Token": 'eyJhbGciOiJIUzI1NiIsImlhdCI6MTU0ODAyNDM4NCwiZXhwIjoxNTQ4MDI3OTg0fQ.eyJjb25maXJtIjozfQ.fJzfpk9nYWzO11mLA9Q8pLkCdtYfgQ89it3-xq74_JA',
              }
 
 
