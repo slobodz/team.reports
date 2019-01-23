@@ -41,22 +41,18 @@ def merge_lists_of_dicts(list1, list2):
 
 
 
-def get_request(endpoint, headers, output):
-    #a = r.get(URL + lista[0]endpoint, headers=headers)
-    #a = r.get(URL + lista[0], headers=lista[1])
-    #if a.ok:
-    #    lista[2].put(a.json())
-    #else:
-    #    return None
-    #return lista**2
-    a = r.get(URL + endpoint, headers=headers)
-    output.put(a.json())
-
-
 async def fetch(url, headers, session):
     async with session.get(url, params=headers) as response:
         if(response.reason == 'OK'):
             return await response.json()
+
+async def fetch_bytes(url, headers, session, product_code):
+    async with session.get(url, params=headers) as response:
+        if(response.reason == 'OK'):
+            photo_bytes = await response.read()
+            return {PRODUCT_CODE: product_code, 'photo': photo_bytes}
+        # else:
+        #     return {PRODUCT_CODE: product_code, 'photo': None}
 
 async def get_all_async(headers_for_all):
     product_tasks = []
@@ -64,8 +60,8 @@ async def get_all_async(headers_for_all):
     price_tasks = []
     attachment_tasks = []
 
- # Fetch all responses within one Client session,
- # keep connection alive for all requests.
+    # Fetch all responses within one Client session,
+    # keep connection alive for all requests.
     async with ClientSession() as session:
         for headers in headers_for_all:
             product_task = asyncio.ensure_future(fetch(URL + 'api/product', headers, session))
@@ -94,11 +90,22 @@ async def get_all_async(headers_for_all):
         )
 
 
- #lista.extend(responses)
- #return responses
-    
-     #print(responses)
-     # you now have all response bodies in this variable
+async def get_all_photos_async(token, products_jpgs):
+
+    photo_tasks = []
+    headers = {"Token": token}
+
+    # Fetch all responses within one Client session,
+    # keep connection alive for all requests.
+    async with ClientSession() as session:
+        for product in products_jpgs:
+            photo_task = asyncio.ensure_future(fetch_bytes(URL + 'api/product/attachment/image/' + product['file_name'], headers, session, product[PRODUCT_CODE]))
+            photo_tasks.append(photo_task)
+
+        photo_responses = await asyncio.gather(*photo_tasks)
+
+    return [photo_data for photo_data in photo_responses if photo_data is not None]
+
 
 
 
@@ -113,77 +120,16 @@ def get_all_products(token):
                             "Page": str(i + 1)} #because loop starts from 0 but pages starts from 1
                             for i in range(how_many_pages)]
 
-
+        #get async all products, stocks, prices and att
         loop = asyncio.get_event_loop()
         future = asyncio.ensure_future(get_all_async(headers_for_all))
         loop.run_until_complete(future)
 
 
-        product_list = future.result()
-        #, stock_list, price_list, attachment_list
-
-        # for page in range():
-        #     headers = {
-        #                 "Content-Type": "application/json",
-        #                 "Token": token,
-        #                 "Page": str(page + 1)} #because loop starts from 0 but pages starts from 1
-            
-
-            # output = mp.Queue()
-
-
-            # urls = [['api/product', headers, output], ['api/product/stock', headers, output], ['api/product/price', headers, output], ['api/product/attachment', headers, output]]
-
-            # urls = [1,2,3,4]
-
-            # processes = [mp.Process(target=get_request, args=('api/product', headers, output)),
-            #             mp.Process(target=get_request, args=('api/product/stock', headers, output)),
-            #             mp.Process(target=get_request, args=('api/product/price', headers, output)),
-            #             mp.Process(target=get_request, args=('api/product/attachment', headers, output))
-            # ]
-
-            # # Run processes
-            # for p in processes:
-            #     p.start()
-
-            # # Exit the completed processes
-            # # for p in processes:
-            # #     p.join()
-
-            # # Get process results from the output queue
-            # results = [output.get() for p in processes]            
-
-
-
-            # # pool = Pool(processes=4)
-            # # results = pool.map(get_request, urls)
-
-
-            # product_chunk = r.get(URL + 'api/product', headers=headers)
-
-            # #product_chunk = Process(target=r.get, args(URL + 'api/product', headers=headers,))
-            # #product_chunk.start()
-
-
-            # if product_chunk.ok:
-            #     product_list.extend(product_chunk.json())
-
-            # stock_chunk = r.get(URL + 'api/product/stock', headers=headers)
-            # if stock_chunk.ok:
-            #     stock_list.extend(stock_chunk.json())
-
-            # price_chunk = r.get(URL + 'api/product/price', headers=headers)
-            # if price_chunk.ok:
-            #     price_list.extend(price_chunk.json())
-
-            # attachment_chunk = r.get(URL + 'api/product/attachment', headers=headers)
-            # if attachment_chunk.ok:
-            #     attachment_list.extend(attachment_chunk.json())
-
-
-
-
-
+        product_list = future.result()[0]
+        stock_list = future.result()[1]
+        price_list = future.result()[2]
+        attachment_list = future.result()[3]
 
         #merge products with stocks
         product_stock_list = merge_lists_of_dicts(product_list, stock_list)
@@ -194,14 +140,21 @@ def get_all_products(token):
         #merge products+stocks+prices with metadeta attachment
         product_stock_price_att_list = merge_lists_of_dicts(product_stock_price_list, attachment_list)
 
+        #take all products with have a photo (not null)
+        product_jpgs = [{PRODUCT_CODE: product[PRODUCT_CODE], 'file_name': product['file_name']} for product in product_stock_price_att_list if product['file_name']]
+
+        #get photos async
+        loop = asyncio.get_event_loop()
+        future = asyncio.ensure_future(get_all_photos_async(token, product_jpgs))
+        loop.run_until_complete(future)
+
+        photo_list = future.result()
+
+
         #merge products+stocks+prices+att with photos
-        for id_prod, product in enumerate(product_stock_price_att_list):
-            if product['file_name']:
-                photo = r.get(URL + 'api/product/attachment/image/' + product['file_name'], headers={"Token": token})
-                if(photo.ok):
-                    product_stock_price_att_list[id_prod]['photo'] = photo.content
-                
-        return product_stock_price_att_list
+        product_stock_price_att_photo_list = merge_lists_of_dicts(product_stock_price_att_list, photo_list)
+    
+        return product_stock_price_att_photo_list
     except r.exceptions.ConnectionError as e:
         return 'Cannot connect to the server'
         raise

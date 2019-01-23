@@ -1,43 +1,65 @@
 import asyncio
 from aiohttp import ClientSession
+import requests as r
 
 a = []
 
 
-async def fetch(url, headers, session):
+def post_token(email, password):
+    """Send credentials to get token"""
+    try:
+        headers = {"Username": email, "Password": password}
+        return r.post('https://team-services-uat.herokuapp.com/api/auth/', headers=headers)
+    except r.exceptions.ConnectionError as e:
+        return 'Cannot connect to the server'
+
+
+token = post_token('test@kalorik.pl', 'Krakow123').json()['token']
+
+
+
+
+
+
+
+
+
+async def fetch(url, headers, session, prod):
     async with session.get(url, params=headers) as response:
-        return await response.json()
+        print(response.status)
+        a = await response.read()
+        return (prod, a)
 
-async def run(r):
-    url = 'https://team-services-uat.herokuapp.com/api/product'
-    headers = {
-             "Content-Type": "application/json",
-             "Token": 'eyJhbGciOiJIUzI1NiIsImlhdCI6MTU0ODAyNDM4NCwiZXhwIjoxNTQ4MDI3OTg0fQ.eyJjb25maXJtIjozfQ.fJzfpk9nYWzO11mLA9Q8pLkCdtYfgQ89it3-xq74_JA',
-             }
 
+async def test1(token, images):
+
+    images = [('CM1006POD-KALORIK', 'CM1006POD-KALORIK.jpg'), ('AC2F14.0-IN', 'AC2F14.0-IN.jpg')]
+    url = 'https://team-services-uat.herokuapp.com/api/product/attachment/image/'
+
+    headers = {'Token':token}
 
     tasks = []
 
- # Fetch all responses within one Client session,
- # keep connection alive for all requests.
     async with ClientSession() as session:
-        for i in range(r):
-             headers['Page'] = i+1
-             task = asyncio.ensure_future(fetch(url, headers, session))
-             tasks.append(task)
-    
-        responses = await asyncio.gather(*tasks)
-    return [product for sublist in responses for product in sublist]
- #lista.extend(responses)
- #return responses
-    
-     #print(responses)
-     # you now have all response bodies in this variable
+        for image in images:
+            task = asyncio.ensure_future(fetch(url + image[1], headers, session, image[0]))
+            tasks.append(task)
+        a = await asyncio.gather(*tasks)
 
+    return a
 
 
 loop = asyncio.get_event_loop()
-future = asyncio.ensure_future(run(21))
-loop.run_until_complete(future)
+test = asyncio.ensure_future(test1(token))
+loop.run_until_complete(test)
 
-future.result().__len__()
+
+
+
+
+print(test)
+# loop = asyncio.get_event_loop()
+# future = asyncio.ensure_future(run(token))
+# loop.run_until_complete(future)
+
+# future.result().__len__()
