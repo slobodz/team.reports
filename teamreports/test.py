@@ -1,6 +1,8 @@
 import asyncio
 from aiohttp import ClientSession
+import aiohttp
 import requests as r
+import json
 
 a = []
 
@@ -20,44 +22,55 @@ token = post_token('test@kalorik.pl', 'Krakow123').json()['token']
 
 
 
+async def post(url, data, headers, session):
+    async with session.post(url, data=data, params=headers) as response:
+        print(response)
+        return await response.json()
 
 
 
+# async def fetch(url, headers, session, prod):
+#     async with session.get(url, params=headers) as response:
+#         print(response.status)
+#         a = await response.read()
+#         return (prod, a)
 
-async def fetch(url, headers, session, prod):
-    async with session.get(url, params=headers) as response:
-        print(response.status)
-        a = await response.read()
-        return (prod, a)
 
+async def test2(token):
 
-async def test1(token, images):
+    products = ['149006-LAGRANGE', 'testestest']
+    url = 'https://team-services-uat.herokuapp.com/api/product/search'
 
-    images = [('CM1006POD-KALORIK', 'CM1006POD-KALORIK.jpg'), ('AC2F14.0-IN', 'AC2F14.0-IN.jpg')]
-    url = 'https://team-services-uat.herokuapp.com/api/product/attachment/image/'
-
-    headers = {'Token':token}
+    headers = {'Token':token, 'Content-Type': 'application/json'} 
 
     tasks = []
 
+
     async with ClientSession() as session:
-        for image in images:
-            task = asyncio.ensure_future(fetch(url + image[1], headers, session, image[0]))
-            tasks.append(task)
-        a = await asyncio.gather(*tasks)
+        for prod in products:
+            data = {'product_code':prod}
+            #data = json.dumps(data)
+
+            #task = asyncio.ensure_future(post(url, data, headers, session))
+            a = await post(url, data, headers, session)
+            #tasks.append(task)
+        #a = await asyncio.gather(*tasks)
 
     return a
 
 
-loop = asyncio.get_event_loop()
-test = asyncio.ensure_future(test1(token))
-loop.run_until_complete(test)
 
 
 
+# loop = asyncio.get_event_loop()
+# test = asyncio.ensure_future(test2(token))
+# loop.run_until_complete(test)
+
+test = test2(token)
 
 
-print(test)
+
+#print(test)
 # loop = asyncio.get_event_loop()
 # future = asyncio.ensure_future(run(token))
 # loop.run_until_complete(future)

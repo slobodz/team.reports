@@ -19,8 +19,8 @@ def post_token(email, password):
 
 
 def merge_lists_of_dicts(list1, list2):
-    """Merge list of dictionaries from list1 with dictionaries with list2 on product_code which is
-        common key in all dictionaries. list1 should not be empty"""
+    """Merge dictionaries from list1 with dictionaries with list2 on product_code which is
+        common key in all dictionaries. list1 must not be empty"""
     try:
         merged_list = []
         if list1:
@@ -45,7 +45,14 @@ def merge_lists_of_dicts(list1, list2):
 
 async def fetch(url, headers, session):
     async with session.get(url, params=headers) as response:
-        print(response)
+        if(response.reason == 'OK'):
+            return await response.json()
+        else:
+            print(response)
+
+
+async def fetch(url, headers, session):
+    async with session.get(url, params=headers) as response:
         if(response.reason == 'OK'):
             return await response.json()
         else:
@@ -254,7 +261,7 @@ def get_selected_products(product_code_list, token):
         loop.run_until_complete(future)
 
         product_list = future.result()[0]
-        
+
 
         products_ids = future.result()[1]
 
