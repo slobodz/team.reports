@@ -119,7 +119,7 @@ class LoginForm(tk.Tk):
         self.product_label.update_idletasks()
 
         try:
-            a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d') + '.xlsx')
+            a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d_%H%M%S') + '.xlsx')
             a.save_file() # check if file is accessable before processing
 
             selected_products = a.list_all_products()
@@ -149,7 +149,7 @@ class LoginForm(tk.Tk):
 
 
         try:
-            a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d') + '.xlsx')
+            a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d_%H%M%S') + '.xlsx')
             a.save_file() # check if file is accessable before processing
 
             data_products = api.get_all_products(token=self.token)

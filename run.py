@@ -5,6 +5,7 @@ from teamreports.gui import LoginForm
 
 
 def main():
+    """This function runs application gui"""
     a = LoginForm()
     a.mainloop()
 
