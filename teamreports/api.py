@@ -111,9 +111,11 @@ async def get_all_photos_async(token, products_jpgs):
     
     # Fetch all responses within one Client session,
     # keep connection alive for all requests.
-    async with ClientSession(headers={"Token": token}) as session:
+    async with ClientSession(#headers={"Token": token}
+        ) as session:
         for photo in products_jpgs:
-            photo_task = asyncio.ensure_future(fetch_bytes(URL + 'api/product/attachment/image/' + photo['file_name'], session, photo[PRODUCT_CODE]))
+            #photo_task = asyncio.ensure_future(fetch_bytes(URL + 'api/product/attachment/image/' + photo['file_name'], session, photo[PRODUCT_CODE]))
+            photo_task = asyncio.ensure_future(fetch_bytes(photo['tile_url'], session, photo[PRODUCT_CODE]))            
             photo_tasks.append(photo_task)
 
         photo_responses = await asyncio.gather(*photo_tasks)
@@ -168,7 +170,7 @@ def get_all_products(token):
 
 
         #take all products with have a photo (not null)
-        product_jpgs = [{PRODUCT_CODE: product[PRODUCT_CODE], 'file_name': product['file_name']} for product in product_stock_price_att_list if product['file_name']]
+        product_jpgs = [{PRODUCT_CODE: product[PRODUCT_CODE], 'tile_url': product['tile_url']} for product in product_stock_price_att_list if product['tile_url']]
 
         #get photos async
         loop = asyncio.get_event_loop()
@@ -237,12 +239,14 @@ async def get_selected_product_features_async(products_ids, client_headers):
     attachment_list = [att for att in all_resp[2] if att]
 
     #take all products which have a photo (not null)
-    products_jpgs = [{PRODUCT_CODE: att[PRODUCT_CODE], 'file_name': att['file_name']} for att in attachment_list if att['file_name']]
+    products_jpgs = [{PRODUCT_CODE: att[PRODUCT_CODE], 'tile_url': att['tile_url']} for att in attachment_list if att['tile_url']]
     photo_tasks = []
 
-    async with ClientSession(headers={'Token': client_headers['Token']}) as session:
+    async with ClientSession(#headers={'Token': client_headers['Token']}
+        ) as session:
         for photo in products_jpgs:
-            photo_task = asyncio.ensure_future(fetch_bytes(URL + 'api/product/attachment/image/' + photo['file_name'], session, photo[PRODUCT_CODE]))
+            # photo_task = asyncio.ensure_future(fetch_bytes(URL + 'api/product/attachment/image/' + photo['file_name'], session, photo[PRODUCT_CODE]))
+            photo_task = asyncio.ensure_future(fetch_bytes(photo['tile_url'], session, photo[PRODUCT_CODE]))            
             photo_tasks.append(photo_task)
 
         photo_responses = await asyncio.gather(*photo_tasks)
