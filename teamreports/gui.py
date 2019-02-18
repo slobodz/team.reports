@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.ttk as ttk
 from tkinter import messagebox
 from threading import Timer
 import json
@@ -18,18 +19,24 @@ class LoginForm(tk.Tk):
 
         self.title("Team Reports")
 
-
-        self.login_frame = tk.Frame(self, bd=5)
-        self.main_frame = tk.Frame(self, bd=5)
-        self.empty_frame = tk.Frame(self, width=15, bd=5)
-
-
+        #types of images to download from teamservices
+        self.image_types_list = ('undefined', 'boxoffer', 'test')
+        #languages for lexicons
+        self.languages_list = ('English', 'German', 'French')
 
         self.logging_info_text = LabelString()
         self.product_text = LabelString()
         self.full_refresh_text = LabelString()
 
+        self.image_type_value = tk.StringVar()
+        self.language_value = tk.StringVar()        
 
+
+        #level 1
+        self.top_frame = tk.Frame(self, bd=5)
+        #level 2
+        self.login_frame = tk.Frame(self.top_frame, bd=5)
+        #level 3
         self.email_label = tk.Label(self.login_frame, text="Email", width=25)
         self.email_entry = tk.Entry(self.login_frame, bg="white", fg="black", width=25)
         self.password_label = tk.Label(self.login_frame, text="Password", width=25)
@@ -37,20 +44,50 @@ class LoginForm(tk.Tk):
         self.logging_info_label = tk.Label(self.login_frame, textvariable=self.logging_info_text, width=25)
         self.submit_button = tk.Button(self.login_frame, text="Log In", command=self.submit, width=25)
 
-
+        #level 2
+        self.empty_frame = tk.Frame(self.top_frame, width=15, bd=5)
+        self.main_frame = tk.Frame(self.top_frame, bd=5)
+        #level 3
         self.product_label = tk.Label(self.main_frame, textvariable=self.product_text)
         self.product_button = tk.Button(self.main_frame, text="Generate report for\nselected products",
                                         width=25, state='disabled', command=self.generate_selected_products)
         self.full_refresh_label = tk.Label(self.main_frame, textvariable=self.full_refresh_text)
         self.full_refresh_button = tk.Button(self.main_frame, text="Generate report for\nall products",
-                                        width=25, state='disabled', command=self.generate_all_products)
+                                        width=25, state='disabled', command=self.generate_all_products)        
 
 
+        #level 1
+        self.bottom_frame = tk.Frame(self, bd=5)
+        #level 2
+        self.options_separator = tk.Frame(self.bottom_frame, height=2, bg='grey')
+        self.options_label = tk.Label(self.bottom_frame, text="Options")        
+        self.options_dropdown1_frame = tk.Frame(self.bottom_frame, bd=5)
+        #level 3
+        self.image_types_dd = ttk.Combobox(self.options_dropdown1_frame, textvariable=self.image_type_value,
+                                        values=self.image_types_list, state='readonly')
+        self.image_types_dd.current(0)
+        self.image_types_label = tk.Label(self.options_dropdown1_frame, text="Img type:", width=10, anchor='e')
+
+        #level 2
+        self.options_dropdown2_frame = tk.Frame(self.bottom_frame, bd=5)
+        #level 3
+        self.languages_dd = ttk.Combobox(self.options_dropdown2_frame, textvariable=self.language_value,
+                                        values=self.languages_list, state='readonly')
+        self.languages_dd.current(0)
+        self.languages_label = tk.Label(self.options_dropdown2_frame, text="Languages:", width=10, anchor='e')
+
+
+        self.top_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        self.bottom_frame.pack(side=tk.BOTTOM, fill=tk.BOTH, expand=1)        
 
         self.login_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)
         self.empty_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=1)        
         self.main_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=1)
 
+        self.options_separator.pack(side=tk.TOP, fill=tk.BOTH, expand=0)
+        self.options_label.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        self.options_dropdown1_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        self.options_dropdown2_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
         self.email_label.pack(fill=tk.BOTH, expand=1)
         self.email_entry.pack(fill=tk.BOTH, expand=1)
@@ -59,14 +96,15 @@ class LoginForm(tk.Tk):
         self.logging_info_label.pack(fill=tk.BOTH, expand=1)
         self.submit_button.pack(fill=tk.BOTH, expand=1)
 
-
-
         self.product_label.pack(fill=tk.BOTH, expand=1)
         self.product_button.pack(fill=tk.BOTH, expand=1)
         self.full_refresh_label.pack(fill=tk.BOTH, expand=1)
         self.full_refresh_button.pack(fill=tk.BOTH, expand=1)
 
-
+        self.image_types_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+        self.image_types_dd.pack(side=tk.RIGHT, fill=tk.BOTH, expand=1)
+        self.languages_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+        self.languages_dd.pack(side=tk.RIGHT, fill=tk.BOTH, expand=1)
 
     def close_session(self):
         self.product_button.config(state='disabled')
@@ -114,6 +152,8 @@ class LoginForm(tk.Tk):
         self.product_text.set("Loading...")
         self.product_button.config(state='disable')
         self.full_refresh_button.config(state='disable')
+        self.image_types_dd.config(state='disable')
+        self.languages_dd.config(state='disable')
         self.product_label.update_idletasks()
 
         try:
@@ -123,13 +163,16 @@ class LoginForm(tk.Tk):
             selected_products = a.list_all_products()
 
             #send requests for each product
-            data_products = self.api_client.get_selected_products(product_code_list=selected_products)
+            data_products = self.api_client.get_selected_products(product_code_list=selected_products,
+                                        img_type=self.image_types_dd.get(), language=self.languages_dd.get())
 
             a.update_file_with_selected_products(data_products)
 
             self.product_text.set("Done!")
             self.product_button.config(state='normal')
             self.full_refresh_button.config(state='normal')
+            self.image_types_dd.config(state='readonly')
+            self.languages_dd.config(state='readonly')            
             a.save_file()
         except PermissionError:
             self.product_text.set("Please close the file!")
@@ -143,6 +186,8 @@ class LoginForm(tk.Tk):
         self.full_refresh_text.set("Loading...")
         self.product_button.config(state='disable')
         self.full_refresh_button.config(state='disable')
+        self.image_types_dd.config(state='disable')
+        self.languages_dd.config(state='disable')        
         self.full_refresh_label.update_idletasks()
 
 
@@ -150,7 +195,7 @@ class LoginForm(tk.Tk):
             a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d_%H%M%S') + '.xlsx')
             a.save_file() # check if file is accessable before processing
 
-            data_products = self.api_client.get_all_products()
+            data_products = self.api_client.get_all_products(img_type=self.image_types_dd.get(), language=self.languages_dd.get())
 
             #populate file with all possible products available for current user(token)
             a.update_all_products(data_products)
@@ -158,6 +203,8 @@ class LoginForm(tk.Tk):
             self.full_refresh_text.set("Done!")
             self.product_button.config(state='normal')
             self.full_refresh_button.config(state='normal')
+            self.image_types_dd.config(state='readonly')
+            self.languages_dd.config(state='readonly')            
             a.save_file()
         except PermissionError:
             self.full_refresh_text.set("Please close the file!")

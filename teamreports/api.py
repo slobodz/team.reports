@@ -72,7 +72,7 @@ class ApiClient:
             else:
                 print(response)
 
-    def get_all_products(self):
+    def get_all_products(self, img_type, language):
         try:
             #get async all products, stocks, prices and att
             asyncio.set_event_loop(asyncio.new_event_loop()) #setup new loop and use it as active in the next line
@@ -256,7 +256,7 @@ class ApiClient:
                     'images': image_list
             }
 
-    def get_selected_products(self, product_code_list):
+    def get_selected_products(self, product_code_list, img_type, language):
         try:
 
             #get async all products
