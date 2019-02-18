@@ -21,3 +21,7 @@ deploy
 team.datasync.egg-info
 
 report*.xlsx
+dist.zip
+*.spec
+*.7z
+*.exe

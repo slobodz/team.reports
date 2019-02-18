@@ -10,4 +10,4 @@
 #pip install C:\Project\team.datasync\dist\team.reports-0.0.1-py3-none-any.whl
 
 
-pyinstaller --onefile --windowed teamreports\run.py
+pyinstaller --onefile --clean -n TeamReports run.py

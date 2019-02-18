@@ -55,23 +55,23 @@ class ExcelFile:
             #self.sheet.column_dimensions[_current_column].width = 30 #experimental
 
             #alignment
-            self.sheet[_current_cell].alignment = Alignment(horizontal='left', vertical='center')
+            # self.sheet[_current_cell].alignment = Alignment(horizontal='left', vertical='center')
 
             #fill
-            if item in ['available', 'default_price', 'price']:
-                self.sheet[_current_cell].fill = PatternFill(patternType='solid', start_color='D9D9D9')
+            # if item in ['available', 'default_price', 'price']:
+            #     self.sheet[_current_cell].fill = PatternFill(patternType='solid', start_color='D9D9D9')
 
             #border
-            self.sheet[_current_cell].border = Border(
-                                                        left=Side(border_style='thin', color='000000'),
-                                                        right=Side(border_style='thin', color='000000'),
-                                                        top=Side(border_style='thin', color='000000'),
-                                                        bottom=Side(border_style='thin', color='000000')
-                                                    )
+            # self.sheet[_current_cell].border = Border(
+            #                                             left=Side(border_style='thin', color='000000'),
+            #                                             right=Side(border_style='thin', color='000000'),
+            #                                             top=Side(border_style='thin', color='000000'),
+            #                                             bottom=Side(border_style='thin', color='000000')
+            #                                         )
 
             #bold
-            if item in ['available', 'default_price', 'price']:
-                self.sheet[_current_cell].font = Font(bold=True)            
+            # if item in ['available', 'default_price', 'price']:
+            #     self.sheet[_current_cell].font = Font(bold=True)            
 
             if(item == self.PHOTO_CODE and item in product):        
 
