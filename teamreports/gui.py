@@ -4,7 +4,7 @@ from threading import Timer
 import json
 import requests as r
 import time
-from teamreports import api
+from teamreports.api import ApiClient
 from teamreports import app_config
 from teamreports.excel import ExcelFile
 
@@ -83,11 +83,11 @@ class LoginForm(tk.Tk):
         self.password = self.password_entry.get()
         self.submit_button.update_idletasks()
 
-        self.token_call = api.post_token(email=self.email, password=self.password)
 
+        #init ApiClient instance to work with
+        self.api_client = ApiClient(email=self.email, password=self.password)
 
-        if(self.token_call.ok):
-            self.token = self.token_call.json()['token']
+        if(self.api_client.token_call.ok):
             self.t = Timer(1800, self.close_session)
             self.t.start()
 
@@ -98,8 +98,6 @@ class LoginForm(tk.Tk):
             self.product_button.config(state='normal')
             self.full_refresh_button.config(state='normal')
             self.empty_frame.focus()
-
-
 
         else:
             self.logging_info_text.set("Invalid credentials")
@@ -120,12 +118,12 @@ class LoginForm(tk.Tk):
 
         try:
             a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d_%H%M%S') + '.xlsx')
-            a.save_file() # check if file is accessable before processing
+            a.save_file(skip_delete=True) # check if file is accessable before processing
 
             selected_products = a.list_all_products()
 
             #send requests for each product
-            data_products = api.get_selected_products(product_code_list=selected_products, token=self.token)
+            data_products = self.api_client.get_selected_products(product_code_list=selected_products)
 
             a.update_file_with_selected_products(data_products)
 
@@ -152,7 +150,7 @@ class LoginForm(tk.Tk):
             a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d_%H%M%S') + '.xlsx')
             a.save_file() # check if file is accessable before processing
 
-            data_products = api.get_all_products(token=self.token)
+            data_products = self.api_client.get_all_products()
 
             #populate file with all possible products available for current user(token)
             a.update_all_products(data_products)
@@ -181,10 +179,4 @@ class LabelString(tk.StringVar):
         """Reset to empty string all instances"""
         for obj in cls.objs:
             obj.set("")
-
-
-
-# if __name__ == '__main__':
-#     a = LoginForm()
-#     a.mainloop()
 
