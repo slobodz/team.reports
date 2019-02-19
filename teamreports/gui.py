@@ -22,7 +22,7 @@ class LoginForm(tk.Tk):
         #types of images to download from teamservices
         self.image_types_list = ('undefined', 'boxoffer', 'test')
         #languages for lexicons
-        self.languages_list = ('English', 'German', 'French')
+        self.languages_list = ('en-EN', 'pl-PL', 'de-DE', 'fr-FR')
 
         self.logging_info_text = LabelString()
         self.product_text = LabelString()

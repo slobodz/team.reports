@@ -210,10 +210,11 @@ class ApiClient:
 
 
 
-    async def get_selected_product_features_async(self, products_ids):
+    async def get_selected_product_features_async(self, products_ids, img_type, language):
         stock_tasks = []
         price_tasks = []
         attachment_tasks = []
+        feature_tasks = []
 
 
         async with ClientSession(headers=self.headers_contenttype_token) as session:
@@ -224,17 +225,22 @@ class ApiClient:
                 price_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/price/aggregated/' + product_id, session=session))
                 price_tasks.append(price_task)            
 
-                attachment_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/attachment/aggregated/' + product_id, session=session))
+                attachment_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/product/' + product_id + '/attachment/' + img_type, session=session))
                 attachment_tasks.append(attachment_task)
+
+                feature_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/product/' + product_id + '/feature/' + language, session=session))
+                feature_tasks.append(feature_task)                
 
             stock_responses = asyncio.gather(*stock_tasks)
             price_responses = asyncio.gather(*price_tasks)
             attachment_responses = asyncio.gather(*attachment_tasks)
-            all_resp = await asyncio.gather(stock_responses, price_responses, attachment_responses)
+            feature_responses = asyncio.gather(*feature_tasks)            
+            all_resp = await asyncio.gather(stock_responses, price_responses, attachment_responses, feature_responses)
 
         stock_list = [stock for stock in all_resp[0] if stock]
         price_list = [price for price in all_resp[1] if price]
         attachment_list = [att for att in all_resp[2] if att]
+        feature_list = [feat for feat in all_resp[3] if feat]
 
         #take all products which have a image (not null)
         products_jpgs = [{'product_code': att['product_code'], 'tile_url': att['tile_url']} for att in attachment_list if att['tile_url']]
@@ -253,6 +259,7 @@ class ApiClient:
                     'stocks': stock_list,
                     'prices': price_list,
                     'attachments': attachment_list,
+                    'features': feature_list,
                     'images': image_list
             }
 
@@ -269,14 +276,15 @@ class ApiClient:
             products_ids = future.result()['products_ids']
 
 
-            #get async all stocks, prices, att, images
+            #get async all stocks, prices, att, features, images
             loop = asyncio.get_event_loop()
-            future = asyncio.ensure_future(self.get_selected_product_features_async(products_ids))
+            future = asyncio.ensure_future(self.get_selected_product_features_async(products_ids, img_type, language))
             loop.run_until_complete(future)
 
             stock_list = future.result()['stocks']
             price_list = future.result()['prices']
             attachment_list = future.result()['attachments']
+            feature_list = future.result()['features']
             image_list = future.result()['images']
 
             loop.close() #close loop so the memory is released
@@ -309,9 +317,15 @@ class ApiClient:
             else:        
                 product_stock_price_att_image_list = self.merge_lists_of_dicts(product_stock_price_att_list, image_list)            
 
+            #merge products+stocks+prices+att+image with features
+            if not feature_list:
+                product_stock_price_att_image_feat_list = product_stock_price_att_image_list
+            else:        
+                product_stock_price_att_image_feat_list = self.merge_lists_of_dicts(product_stock_price_att_image_list, feature_list)            
+
 
                             
-            return product_stock_price_att_image_list
+            return product_stock_price_att_image_feat_list
         except Exception as e:
             print(e)
             raise
