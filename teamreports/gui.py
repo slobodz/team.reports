@@ -19,17 +19,24 @@ class LoginForm(tk.Tk):
 
         self.title("Team Reports")
 
+        #select environment to connect
+        self.environment_list = ('PRD', 'UAT')
+
         #types of images to download from teamservices
-        self.image_types_list = ('undefined', 'boxoffer', 'test')
+        self.image_types_list = ('wbc', 'undefined', 'offer', 'boxoffer', 'arr', 'iwbc', 'ico', 'fnk', 'threedbox', 'threedprod',
+                                'threedpallet', 'threedmix', 'mix', 'png', 'fbk', 'real', 'baner', 'sqr')
         #languages for lexicons
-        self.languages_list = ('en-EN', 'pl-PL', 'de-DE', 'fr-FR')
+        self.languages_list = ('pl-PL', 'en-EN', 'de-DE', 'fr-FR')
+
+
 
         self.logging_info_text = LabelString()
         self.product_text = LabelString()
         self.full_refresh_text = LabelString()
 
         self.image_type_value = tk.StringVar()
-        self.language_value = tk.StringVar()        
+        self.language_value = tk.StringVar()
+        self.environment_value = tk.StringVar()
 
 
         #level 1
@@ -66,7 +73,7 @@ class LoginForm(tk.Tk):
         self.image_types_dd = ttk.Combobox(self.options_dropdown1_frame, textvariable=self.image_type_value,
                                         values=self.image_types_list, state='readonly')
         self.image_types_dd.current(0)
-        self.image_types_label = tk.Label(self.options_dropdown1_frame, text="Img type:", width=10, anchor='e')
+        self.image_types_label = tk.Label(self.options_dropdown1_frame, text="Image type:", width=10, anchor='e')
 
         #level 2
         self.options_dropdown2_frame = tk.Frame(self.bottom_frame, bd=5)
@@ -75,6 +82,14 @@ class LoginForm(tk.Tk):
                                         values=self.languages_list, state='readonly')
         self.languages_dd.current(0)
         self.languages_label = tk.Label(self.options_dropdown2_frame, text="Languages:", width=10, anchor='e')
+
+        #level 2
+        self.options_dropdown3_frame = tk.Frame(self.bottom_frame, bd=5)
+        #level 3
+        self.environment_dd = ttk.Combobox(self.options_dropdown3_frame, textvariable=self.environment_value,
+                                        values=self.environment_list, state='readonly')
+        self.environment_dd.current(0)
+        self.environment_label = tk.Label(self.options_dropdown3_frame, text="Environment:", width=10, anchor='e')
 
 
         self.top_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
@@ -86,8 +101,10 @@ class LoginForm(tk.Tk):
 
         self.options_separator.pack(side=tk.TOP, fill=tk.BOTH, expand=0)
         self.options_label.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        self.options_dropdown1_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        self.options_dropdown2_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+        self.options_dropdown3_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1) #environments
+        self.options_dropdown1_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1) #img types
+        self.options_dropdown2_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=1) #languages
+
 
         self.email_label.pack(fill=tk.BOTH, expand=1)
         self.email_entry.pack(fill=tk.BOTH, expand=1)
@@ -101,12 +118,16 @@ class LoginForm(tk.Tk):
         self.full_refresh_label.pack(fill=tk.BOTH, expand=1)
         self.full_refresh_button.pack(fill=tk.BOTH, expand=1)
 
+        self.environment_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
+        self.environment_dd.pack(side=tk.RIGHT, fill=tk.BOTH, expand=1)        
         self.image_types_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         self.image_types_dd.pack(side=tk.RIGHT, fill=tk.BOTH, expand=1)
         self.languages_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=0)
         self.languages_dd.pack(side=tk.RIGHT, fill=tk.BOTH, expand=1)
 
     def close_session(self):
+        """Disable generate buttons so have to login again.
+        This is triggered after 30 mins"""
         self.product_button.config(state='disabled')
         self.full_refresh_button.config(state='disabled')
         self.logging_info_text.set("Please log in again")
@@ -154,6 +175,7 @@ class LoginForm(tk.Tk):
         self.full_refresh_button.config(state='disable')
         self.image_types_dd.config(state='disable')
         self.languages_dd.config(state='disable')
+        self.environment_dd.config(state='disable')
         self.product_label.update_idletasks()
 
         try:
@@ -172,12 +194,20 @@ class LoginForm(tk.Tk):
             self.product_button.config(state='normal')
             self.full_refresh_button.config(state='normal')
             self.image_types_dd.config(state='readonly')
-            self.languages_dd.config(state='readonly')            
+            self.languages_dd.config(state='readonly')
+            self.environment_dd.config(state='readonly')
             a.save_file()
         except PermissionError:
             self.product_text.set("Please close the file!")
             self.product_button.config(state='normal')
-            self.full_refresh_button.config(state='normal')            
+            self.full_refresh_button.config(state='normal')
+        except Exception as e:
+            self.product_text.set("Error, try again")
+            self.product_button.config(state='normal')
+            self.full_refresh_button.config(state='normal')
+            self.f = open('log.txt', 'w')
+            self.f.write(e)
+            self.f.close()
 
 
     def generate_all_products(self):
@@ -187,7 +217,8 @@ class LoginForm(tk.Tk):
         self.product_button.config(state='disable')
         self.full_refresh_button.config(state='disable')
         self.image_types_dd.config(state='disable')
-        self.languages_dd.config(state='disable')        
+        self.languages_dd.config(state='disable')
+        self.environment_dd.config(state='disable')
         self.full_refresh_label.update_idletasks()
 
 
@@ -204,14 +235,21 @@ class LoginForm(tk.Tk):
             self.product_button.config(state='normal')
             self.full_refresh_button.config(state='normal')
             self.image_types_dd.config(state='readonly')
-            self.languages_dd.config(state='readonly')            
+            self.languages_dd.config(state='readonly')
+            self.environment_dd.config(state='readonly')                       
             a.save_file()
         except PermissionError:
             self.full_refresh_text.set("Please close the file!")
             self.product_button.config(state='normal')
-            self.full_refresh_button.config(state='normal')            
-
-
+            self.full_refresh_button.config(state='normal')
+        except Exception as e:
+            self.full_refresh_text.set("Error, try again")
+            self.product_button.config(state='normal')
+            self.full_refresh_button.config(state='normal')
+            print(e)
+            self.f = open('log.txt', 'w')
+            self.f.write(str(e))
+            self.f.close()
 
 class LabelString(tk.StringVar):
     """String creator for tk objects"""

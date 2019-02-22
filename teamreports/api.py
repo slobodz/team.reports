@@ -77,14 +77,14 @@ class ApiClient:
             #get async all products, stocks, prices and att
             asyncio.set_event_loop(asyncio.new_event_loop()) #setup new loop and use it as active in the next line
             loop = asyncio.get_event_loop()
-            future = asyncio.ensure_future(self.get_all_async())
+            future = asyncio.ensure_future(self.get_all_async(img_type, language))
             loop.run_until_complete(future)
 
             product_list = future.result()['products']
             stock_list = future.result()['stocks']
             price_list = future.result()['prices']
             attachment_list = future.result()['attachments']
-
+            feature_list = future.result()['features']
 
             #merge products with stocks
             if not stock_list:
@@ -106,9 +106,16 @@ class ApiClient:
             else:        
                 product_stock_price_att_list = self.merge_lists_of_dicts(product_stock_price_list, attachment_list)
 
+            #merge products+stocks+prices+att with metadeta feature
+            if not feature_list:
+                product_stock_price_att_feat_list = product_stock_price_att_list
+            else:        
+                product_stock_price_att_feat_list = self.merge_lists_of_dicts(product_stock_price_att_list, feature_list)
+
+
 
             #take all products with have a photo (not null)
-            product_jpgs = [{'product_code': product['product_code'], 'tile_url': product['tile_url']} for product in product_stock_price_att_list if product['tile_url']]
+            product_jpgs = [{'product_code': product['product_code'], 'tile_url': product['tile_url']} for product in product_stock_price_att_feat_list if 'tile_url' in product]
 
             #get photos async
             loop = asyncio.get_event_loop()
@@ -120,21 +127,22 @@ class ApiClient:
             loop.close()
 
 
-            #merge products+stocks+prices+att with photos
-            product_stock_price_att_image_list = self.merge_lists_of_dicts(product_stock_price_att_list, image_list)
+            #merge products+stocks+prices+att+feat with images
+            product_stock_price_att_feat_image_list = self.merge_lists_of_dicts(product_stock_price_att_feat_list, image_list)
         
-            return product_stock_price_att_image_list
+            return product_stock_price_att_feat_image_list
         except Exception as e:
             print(e)
             raise
 
 
 
-    async def get_all_async(self):
+    async def get_all_async(self, img_type, language):
         product_tasks = []
         stock_tasks = []
         price_tasks = []
         attachment_tasks = []
+        feature_tasks = []
 
         page_info = r.get(app_config.URL + 'api/products/count', headers=self.headers_contenttype_token).json()
         how_many_pages = math.ceil(page_info['total_count']/page_info['page_size'])
@@ -154,20 +162,25 @@ class ApiClient:
                 price_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/price/aggregated', headers=headers, session=session))
                 price_tasks.append(price_task)
 
-                attachment_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/attachment/aggregated', headers=headers, session=session))
+                attachment_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/attachment/aggregated/' + img_type, headers=headers, session=session))
                 attachment_tasks.append(attachment_task)
+
+                feature_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/feature/' + language, headers=headers, session=session))
+                feature_tasks.append(feature_task)
 
             product_responses = asyncio.gather(*product_tasks)
             stock_responses = asyncio.gather(*stock_tasks)
             price_responses = asyncio.gather(*price_tasks)
             attachment_responses = asyncio.gather(*attachment_tasks)
-            all_resp = await asyncio.gather(product_responses, stock_responses, price_responses, attachment_responses)
+            feature_responses = asyncio.gather(*feature_tasks)            
+            all_resp = await asyncio.gather(product_responses, stock_responses, price_responses, attachment_responses, feature_responses)
 
         return  {
                     'products': [product for sublist in all_resp[0] if sublist is not None for product in sublist],
                     'stocks': [stock for sublist in all_resp[1] if sublist is not None for stock in sublist if sublist is not None],
                     'prices': [price for sublist in all_resp[2] if sublist is not None for price in sublist if sublist is not None],
-                    'attachments': [attachment for sublist in all_resp[3] if sublist is not None for attachment in sublist if sublist is not None]
+                    'attachments': [attachment for sublist in all_resp[3] if sublist is not None for attachment in sublist if sublist is not None],
+                    'features': [feature for sublist in all_resp[4] if sublist is not None for feature in sublist if sublist is not None]                    
                 }
 
 
