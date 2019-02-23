@@ -2,13 +2,13 @@ import requests as r
 import math
 from PIL import Image
 from io import BytesIO
-from teamreports import app_config
 import asyncio
 from aiohttp import ClientSession
 
 class ApiClient:
 
-    def __init__(self, email, password):
+    def __init__(self, url, email, password):
+        self.url = url
         self.token_call = self.post_token(email, password)
         if self.token_call.ok:
             self.headers_token = {'Token': self.token_call.json()['token']}
@@ -19,7 +19,7 @@ class ApiClient:
         """Send credentials to get token"""
 
         headers = {"Username": email, "Password": password}
-        return r.post(app_config.URL + 'api/auth/', headers=headers)
+        return r.post(self.url + 'api/auth/', headers=headers)
 
 
     def merge_lists_of_dicts(self, list1, list2):
@@ -144,7 +144,7 @@ class ApiClient:
         attachment_tasks = []
         feature_tasks = []
 
-        page_info = r.get(app_config.URL + 'api/products/count', headers=self.headers_contenttype_token).json()
+        page_info = r.get(self.url + 'api/products/count', headers=self.headers_contenttype_token).json()
         how_many_pages = math.ceil(page_info['total_count']/page_info['page_size'])
 
     
@@ -153,19 +153,19 @@ class ApiClient:
 
                 headers = {'Page': page + 1} #pages starts from 1 not 0
 
-                product_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products', headers=headers, session=session))
+                product_task = asyncio.ensure_future(self.fetch(self.url + 'api/products', headers=headers, session=session))
                 product_tasks.append(product_task)
                 
-                stock_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/stock/aggregated', headers=headers, session=session))
+                stock_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/stock/aggregated', headers=headers, session=session))
                 stock_tasks.append(stock_task)
 
-                price_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/price/aggregated', headers=headers, session=session))
+                price_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/price/aggregated', headers=headers, session=session))
                 price_tasks.append(price_task)
 
-                attachment_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/attachment/aggregated/' + img_type, headers=headers, session=session))
+                attachment_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/attachment/aggregated/' + img_type, headers=headers, session=session))
                 attachment_tasks.append(attachment_task)
 
-                feature_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/feature/' + language, headers=headers, session=session))
+                feature_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/feature/' + language, headers=headers, session=session))
                 feature_tasks.append(feature_task)
 
             product_responses = asyncio.gather(*product_tasks)
@@ -207,7 +207,7 @@ class ApiClient:
         async with ClientSession(headers=self.headers_contenttype_token) as session:
             for product_code in product_code_list:
                 product_json = {'product_code': product_code}
-                product_task = asyncio.ensure_future(self.post_for_product(app_config.URL + 'api/product/search/', session, product_json))
+                product_task = asyncio.ensure_future(self.post_for_product(self.url + 'api/product/search/', session, product_json))
                 product_tasks.append(product_task)               
 
             product_responses = await asyncio.gather(*product_tasks)
@@ -232,16 +232,16 @@ class ApiClient:
 
         async with ClientSession(headers=self.headers_contenttype_token) as session:
             for product_id in products_ids:
-                stock_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/stock/aggregated/' + product_id, session=session))
+                stock_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/stock/aggregated/' + product_id, session=session))
                 stock_tasks.append(stock_task)
 
-                price_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/products/price/aggregated/' + product_id, session=session))
+                price_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/price/aggregated/' + product_id, session=session))
                 price_tasks.append(price_task)            
 
-                attachment_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/product/' + product_id + '/attachment/' + img_type, session=session))
+                attachment_task = asyncio.ensure_future(self.fetch(self.url + 'api/product/' + product_id + '/attachment/' + img_type, session=session))
                 attachment_tasks.append(attachment_task)
 
-                feature_task = asyncio.ensure_future(self.fetch(app_config.URL + 'api/product/' + product_id + '/feature/' + language, session=session))
+                feature_task = asyncio.ensure_future(self.fetch(self.url + 'api/product/' + product_id + '/feature/' + language, session=session))
                 feature_tasks.append(feature_task)                
 
             stock_responses = asyncio.gather(*stock_tasks)

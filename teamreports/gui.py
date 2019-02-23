@@ -6,11 +6,9 @@ import json
 import requests as r
 import time
 from teamreports.api import ApiClient
-from teamreports import app_config
+import teamreports.appconfig
 from teamreports.excel import ExcelFile
 
-
-URL = app_config.URL
 
 class LoginForm(tk.Tk):
     def __init__(self):
@@ -126,12 +124,25 @@ class LoginForm(tk.Tk):
         self.languages_dd.pack(side=tk.RIGHT, fill=tk.BOTH, expand=1)
 
     def close_session(self):
-        """Disable generate buttons so have to login again.
+        """Disable generate buttons so could have to login again.
         This is triggered after 30 mins"""
         self.product_button.config(state='disabled')
         self.full_refresh_button.config(state='disabled')
         self.logging_info_text.set("Please log in again")
         self.logging_info_label.config(fg='black')
+
+
+    def get_config_environment(self):
+        """Get env from dropdown list and return URL from selected config"""
+        self.env_from_dd = self.environment_dd.get()
+
+        if self.env_from_dd == 'UAT':
+            self.app_config = teamreports.appconfig.UATConfig
+        if self.env_from_dd == 'PRD':
+            self.app_config = teamreports.appconfig.ProductionConfig
+
+        return self.app_config.URL
+
 
     def submit(self):
         """Send post request with credentials"""
@@ -142,9 +153,11 @@ class LoginForm(tk.Tk):
         self.password = self.password_entry.get()
         self.submit_button.update_idletasks()
 
+        #get URL to work with (from config)
+        self.url = self.get_config_environment()
 
         #init ApiClient instance to work with
-        self.api_client = ApiClient(email=self.email, password=self.password)
+        self.api_client = ApiClient(url=self.url, email=self.email, password=self.password)
 
         if(self.api_client.token_call.ok):
             self.t = Timer(1800, self.close_session)
