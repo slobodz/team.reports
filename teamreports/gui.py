@@ -79,7 +79,7 @@ class LoginForm(tk.Tk):
         self.languages_dd = ttk.Combobox(self.options_dropdown2_frame, textvariable=self.language_value,
                                         values=self.languages_list, state='readonly')
         self.languages_dd.current(0)
-        self.languages_label = tk.Label(self.options_dropdown2_frame, text="Languages:", width=10, anchor='e')
+        self.languages_label = tk.Label(self.options_dropdown2_frame, text="Language:", width=10, anchor='e')
 
         #level 2
         self.options_dropdown3_frame = tk.Frame(self.bottom_frame, bd=5)
@@ -218,6 +218,9 @@ class LoginForm(tk.Tk):
             self.product_text.set("Error, try again")
             self.product_button.config(state='normal')
             self.full_refresh_button.config(state='normal')
+            self.image_types_dd.config(state='readonly')
+            self.languages_dd.config(state='readonly')
+            self.environment_dd.config(state='readonly')            
             self.f = open('log.txt', 'w')
             self.f.write(e)
             self.f.close()
@@ -237,7 +240,7 @@ class LoginForm(tk.Tk):
 
         try:
             a = ExcelFile(target_filename='report_' + time.strftime('%Y%m%d_%H%M%S') + '.xlsx')
-            a.save_file() # check if file is accessable before processing
+            a.save_file(skip_delete=True) # check if file is accessable before processing
 
             data_products = self.api_client.get_all_products(img_type=self.image_types_dd.get(), language=self.languages_dd.get())
 
@@ -259,6 +262,9 @@ class LoginForm(tk.Tk):
             self.full_refresh_text.set("Error, try again")
             self.product_button.config(state='normal')
             self.full_refresh_button.config(state='normal')
+            self.image_types_dd.config(state='readonly')
+            self.languages_dd.config(state='readonly')
+            self.environment_dd.config(state='readonly')            
             print(e)
             self.f = open('log.txt', 'w')
             self.f.write(str(e))

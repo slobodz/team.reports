@@ -31,7 +31,7 @@ class ProductionConfig:
     DEBUG = False
     API_USERNAME = os.getenv('APP_SETTINGS_API_USERNAME')
     API_PWD = os.getenv('APP_SETTINGS_API_PWD')
-    URL = os.getenv('APP_SETTINGS_URL')
+    URL = 'http://35.189.122.45:5000/'
     LOG_LOCATION = os.getenv('APP_SETTINGS_LOG_LOCATION')
 
 class UATConfig:

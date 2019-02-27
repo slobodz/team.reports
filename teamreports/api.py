@@ -162,7 +162,7 @@ class ApiClient:
                 price_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/price/aggregated', headers=headers, session=session))
                 price_tasks.append(price_task)
 
-                attachment_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/attachment/aggregated/' + img_type, headers=headers, session=session))
+                attachment_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/attachment/' + img_type, headers=headers, session=session))
                 attachment_tasks.append(attachment_task)
 
                 feature_task = asyncio.ensure_future(self.fetch(self.url + 'api/products/feature/' + language, headers=headers, session=session))
